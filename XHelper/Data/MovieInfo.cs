@@ -20,7 +20,6 @@ namespace XHelper
         public string ReleaseStudio { get; set; }
         public string ReleaseLabel { get; set; }
         public List<string> Genre { get; set; }
-        public TimeSpan VLength { get; set; }
         public int VWidth { get; set; }
         public int VHeight { get; set; }
         public int NRefFrame { get; set; }
@@ -32,12 +31,7 @@ namespace XHelper
         public List<Guid> ActorUIDs { get; set; }
         public DirectoryInfo SourcePath { get; set; }
         public string SourceMediaFileExt { get; set; }
-        public Uri CoverWebUri { get; set; }
-        public DirectoryInfo CoverDirectoryInfo { get; set; }
-        public FileInfo CoverFileInfo { get; set; }
-        public List<Uri> MovSamplesWebUri { get; set; }
-        public List<Uri> MovSamplesLocalUri { get; set; }
-        public DirectoryInfo DirSamples { get; set; }
+        public string CoverFileName { get; set; }
         public Uri OfficialWeb { get; set; }
 
         public override string ToString()
@@ -45,11 +39,13 @@ namespace XHelper
             return ReleaseID;
         }
 
-        public void AnalysisMediaFiles(string targetFileNameFromSource)
+        /// <summary>
+        /// Analysis media files -> MediaFiles/MediaFilesTotalLength/MediaFilesTotalSize/MediaFilesDecodeDesc/VWidth/VHeight/NRefFrame/VFormat
+        /// </summary>
+        /// <param name="targetFileNameFromSource">Full name of media file.</param>
+        public MovieInfo(string targetFileNameFromSource)
         {
             ActorUIDs = new List<Guid>();
-            MovSamplesWebUri = new List<Uri>();
-            MovSamplesLocalUri = new List<Uri>();
             MediaFiles = new List<MediaFileInfo>();
 
             SourcePath = new DirectoryInfo(Path.GetDirectoryName(targetFileNameFromSource));
@@ -67,6 +63,10 @@ namespace XHelper
 
             if (MediaFiles == null) return;
             if (MediaFiles.Count == 0) return;
+            VWidth = MediaFiles[0].VWidth;
+            VHeight = MediaFiles[0].VHeight;
+            NRefFrame = MediaFiles[0].NRefFrame;
+            VFormat = MediaFiles[0].VFormat;
             MediaFilesTotalLength = TimeSpan.FromSeconds(MediaFiles.Sum(t => t.VLength.TotalSeconds));
             MediaFilesTotalSize = MediaFiles.Sum(t => t.VFileSize);
             MediaFilesDecodeDesc = string.Format("[{0}, {1}*{2}, {3:00}:{4:00}:{5:00}, {6}, {7}]",
@@ -76,23 +76,8 @@ namespace XHelper
                     MediaFilesTotalLength.Hours,
                     MediaFilesTotalLength.Minutes,
                     MediaFilesTotalLength.Seconds,
-                    XGlobal.Format_MachineSize(MediaFilesTotalSize),
+                    XService.Format_MachineSize(MediaFilesTotalSize),
                     MediaFiles[0].Type2D3D);
-        }
-
-        public void RestoreCoverFileFromTemp()
-        {
-            if (CoverFileInfo != null)
-            {
-                CoverFileInfo.MoveTo(Path.Combine(CoverDirectoryInfo.FullName, CoverFileInfo.Name));
-                XGlobal.CurrentContext.DirCoversTemp.Delete(true);
-            }
-        }
-
-        public void RestoreSampleFilesFromTemp()
-        {
-            XGlobal.MoveImageFolder(XGlobal.CurrentContext.DirSamplesTemp, DirSamples, ".jpg");
-            //XGlobal.CurrentContext.DirSamplesTemp.Delete(true);
         }
     }
 
@@ -153,7 +138,7 @@ namespace XHelper
                     tss.Hours,
                     tss.Minutes,
                     tss.Seconds,
-                    XGlobal.Format_MachineSize(_mfile.General.Size),
+                    XService.Format_MachineSize(_mfile.General.Size),
                     Type2D3D);
             }
         }

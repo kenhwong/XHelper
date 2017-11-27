@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Configuration;
 
 namespace XHelper
 {
@@ -14,75 +15,44 @@ namespace XHelper
 
         public Guid UniqueID { get; set; }
         public string JName { get; set; }
-        public string CName { get; set; }
-        public string EName { get; set; }
-        public string KanaName { get; set; }
         public int Rate { get; set; }
         public List<string> StoredMovieIDs { get; set; }
-        public Uri AvatorWebUri { get; set; }
         public string NameStored { get; set; }
-        public FileInfo AvatorFileInfo { get; set; }
-        public string OfficialWeb_JA { get; set; }
-        public string OfficialWeb_EN { get; set; }
-
-        public DirectoryInfo LastLocation { get; set; }
+        public string AvatorFileName { get; set; }
+        public Uri AvatorWebUri { get; set; }
+        public string OfficialWeb { get; set; }
         public DirectoryInfo DirStored { get; set; }
-        public DirectoryInfo DirStoredTemp { get; set; }
 
-        public override string ToString()
+        public override string ToString() => JName;
+
+        public StarInfo()
         {
-            if (JName == string.Empty) return CName;
-            return JName;
-        }
-
-        public StarInfo() 
-        { 
-            UniqueID = Guid.NewGuid(); 
-            StoredMovieIDs = new List<string>(); 
-        }
-        public StarInfo(string jname) 
-        { 
-            JName = jname;
             UniqueID = Guid.NewGuid();
             StoredMovieIDs = new List<string>();
         }
+        public StarInfo(string jname) : this() => JName = jname;
 
         public void CreateLocalStarDirectory(MovieInfo m)
         {
-            NameStored = $"[{JName}][{EName}]";
-            LastLocation = new DirectoryInfo(Path.Combine(m.SourcePath.Root.FullName, XGlobal.ArchiveName)).CreateSubdirectory(NameStored);
-        }
-
-        public void CreateStarDirectoryTemp()
-        {
-            DirStoredTemp = XGlobal.CurrentContext.DirStarsTemp.CreateSubdirectory(string.Format("[{0}][{1}]", JName, EName));
+            NameStored = $"[{JName}]";
+            DirStored = new DirectoryInfo(Path.Combine(m.SourcePath.Root.FullName, ConfigurationManager.AppSettings["ArchiveName"])).CreateSubdirectory(NameStored);
         }
 
         public async void SaveAvatorImageFileTemp(Stream stream_avator)
         {
-            string tempfilename_avator = Path.Combine(DirStoredTemp.FullName, AvatorWebUri.Segments[AvatorWebUri.Segments.Length - 1]);
+            AvatorFileName = Path.Combine(DirStored.FullName, AvatorWebUri.Segments[AvatorWebUri.Segments.Length - 1]);
 
-            using (FileStream sourceStream = new FileStream(tempfilename_avator, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
+            using (FileStream sourceStream = new FileStream(AvatorFileName, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
             {
                 await stream_avator.CopyToAsync(sourceStream);
                 await sourceStream.FlushAsync();
-            }
-            AvatorFileInfo = new FileInfo(tempfilename_avator);
-        }
-
-        public void RestoreAvatorImageFileFromTemp()
-        {
-            if (AvatorFileInfo != null)
-            {
-                AvatorFileInfo.MoveTo(Path.Combine(DirStored.FullName, AvatorFileInfo.Name));
-                DirStoredTemp.Delete(true);
             }
         }
 
         public List<MovieInfo> GetMoviesList()
         {
             List<MovieInfo> ms = new List<MovieInfo>();
-            foreach(string m in StoredMovieIDs)
+            foreach (string m in StoredMovieIDs)
             {
                 ms.Add(XGlobal.CurrentContext.GetMoviebyReleaseID(m));
             }
