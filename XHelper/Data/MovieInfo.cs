@@ -39,6 +39,8 @@ namespace XHelper
             return ReleaseID;
         }
 
+        public MovieInfo() { }
+
         /// <summary>
         /// Analysis media files -> MediaFiles/MediaFilesTotalLength/MediaFilesTotalSize/MediaFilesDecodeDesc/VWidth/VHeight/NRefFrame/VFormat
         /// </summary>

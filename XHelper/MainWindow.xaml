@@ -141,8 +141,10 @@
                 <Label Style="{DynamicResource TagLable}" Tag="ADD" Content="New Movie" />                
             </StackPanel>
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
-                <TextBox Width="300" />
-                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconBrowse}" x:Name="bnNMBrowse" ToolTip="Browse new movie file..." Width="25" Height="20" Margin="10,0" />
+                <TextBox x:Name="txtNMFullFileName" Width="420" />
+                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconBrowse}" 
+                        x:Name="bnNMBrowse" ToolTip="Browse new movie file..." 
+                        Width="20" Height="20" Margin="10,5,10,0" />
             </StackPanel>
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
                 <Label Content="Movie Information:" />

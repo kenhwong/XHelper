@@ -386,6 +386,8 @@ namespace XHelper
         }
 
         #endregion
+
+        public static 
     }
 
         [Serializable]
