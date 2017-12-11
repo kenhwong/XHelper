@@ -387,7 +387,7 @@ namespace XHelper
 
         #endregion
 
-        public static 
+         
     }
 
         [Serializable]
@@ -523,5 +523,33 @@ namespace XHelper
         }
     }
 
+    public class NRefFrameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int nreff = (int)value;
+            if (nreff == 1) return "2D";
+            else return "3D";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value.Equals(true) ? parameter : System.Windows.Data.Binding.DoNothing;
+        }
+    }
+
+    public class MachineSizeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            long lsize = (long)value;
+            return XService.Format_MachineSize(lsize);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value.Equals(true) ? parameter : System.Windows.Data.Binding.DoNothing;
+        }
+    }
     #endregion
 }

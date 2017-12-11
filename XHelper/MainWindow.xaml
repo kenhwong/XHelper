@@ -5,9 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XHelper"
         mc:Ignorable="d"
+        Name="XUI"
         Title="MainWindow" WindowStartupLocation="CenterScreen" TextOptions.TextFormattingMode="Display" Width="1600" Height="1000">
     <Window.Resources>
         <ResourceDictionary>
+            <local:NRefFrameConverter x:Key="NRefFConverter" />
+            <local:MachineSizeConverter x:Key="MSizeConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style/CommonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -124,7 +127,7 @@
                 <Label Content="Data Seek" FontSize="36" FontFamily="Arial" Style="{StaticResource IconLabel}" Tag="{StaticResource IconSearchR}" Foreground="#3F405040" Margin="0,-20,0,0" Height="40" DockPanel.Dock="Right" />
             </DockPanel>
         </StackPanel>
-        <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Margin="10,0,0,0" Background="{StaticResource PanelBackgroundBrush}">
+        <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Margin="10,0,0,0" Background="{StaticResource PanelBackgroundBrush}" DataContext="{Binding ElementName=XUI, Path=NewMovieInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <Grid.Effect>
                 <DropShadowEffect Color="#FF808080" ShadowDepth="0" BlurRadius="10" Opacity="0.5" />
             </Grid.Effect>
@@ -138,7 +141,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-                <Label Style="{DynamicResource TagLable}" Tag="ADD" Content="New Movie" />                
+                <Label Style="{DynamicResource TagLable}" Tag="ADD" Content="New Movie" />
             </StackPanel>
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
                 <TextBox x:Name="txtNMFullFileName" Width="420" />
@@ -146,8 +149,40 @@
                         x:Name="bnNMBrowse" ToolTip="Browse new movie file..." 
                         Width="20" Height="20" Margin="10,5,10,0" />
             </StackPanel>
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
-                <Label Content="Movie Information:" />
+            <StackPanel Grid.Row="2" Orientation="Vertical" Margin="10,0">
+                <Label Content="{Binding Path=MediaFilesDecodeDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=None.}" ContentStringFormat="Media Information: {0}" />
+                <WrapPanel>
+                    <Label Style="{DynamicResource TagLableSmall}" Tag="fmt" Content="{Binding Path=VFormat, TargetNullValue=Unknown}" Foreground="Green" />
+                    <Label Style="{DynamicResource TagLableSmall}" Tag="res" Foreground="Green">
+                        <Label.Content>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}*{1}" TargetNullValue="Unknown">
+                                        <Binding Path="VWidth" />
+                                        <Binding Path="VHeight" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Label.Content>
+                    </Label>
+                    <Label Style="{DynamicResource TagLableSmall}" Tag="dur" Foreground="Green">
+                        <Label.Content>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}:{1}:{2}" TargetNullValue="Unknown">
+                                        <Binding Path="MediaFilesTotalLength.Hours" />
+                                        <Binding Path="MediaFilesTotalLength.Minutes" />
+                                        <Binding Path="MediaFilesTotalLength.Seconds" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Label.Content>
+                    </Label>
+                    <Label Style="{DynamicResource TagLableSmall}" Tag="size"  Foreground="Green"
+                           Content="{Binding Path=MediaFilesTotalSize, Converter={StaticResource MSizeConverter}, TargetNullValue=--}" />
+                    <Label Style="{DynamicResource TagLableSmall}" Tag="nreff"  Foreground="Green"
+                           Content="{Binding Path=NRefFrame, Converter={StaticResource NRefFConverter}, TargetNullValue=--}" />
+                </WrapPanel>
             </StackPanel>
             <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10">
                 <Label Content="KEY:" />

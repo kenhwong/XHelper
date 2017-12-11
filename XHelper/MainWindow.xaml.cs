@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,14 +20,20 @@ namespace XHelper
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public MovieInfo NewMovieInfo { get; set; } = new MovieInfo();
+        private MovieInfo _newMovieInfo = new MovieInfo();
+        public MovieInfo NewMovieInfo { get { return _newMovieInfo; } set { _newMovieInfo = value; OnPropertyChanged(nameof(NewMovieInfo)); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public MainWindow()
         {
             InitializeComponent();
             InitializeCommand();
+
+            DataContext = this;
         }
 
         public RoutedCommand cmdNMBrowse = new RoutedCommand("CommandNewMovieBrowse", typeof(MainWindow));
@@ -60,14 +67,11 @@ namespace XHelper
 
         }
 
+
         private void Func_OpenNewMovieFile(string _filename)
         {
-            NewMovieInfo.AnalysisMediaFiles(_filename);
-            lbl_MediaFileInfo.Text = CurrentMovieInfo.MediaFilesDecodeDesc;
-            //mi_current.SourcePath = new DirectoryInfo(Path.GetDirectoryName(_filename));
-            txt_NewMovieFullName.Text = _filename;
-            txt_NewMovieFullName.Items.Add(_filename);
-
+            NewMovieInfo = new MovieInfo(_filename);
+            /**
             //mi_current.SourceMediaFileExt = Path.GetExtension(_filename);
             //mi_current.TotalMoviesSize = XHelper.IOHelper_GetMoviesTotalSize(mi_current.SourcePath, mi_current.SourceMediaFileExt);
 
@@ -150,7 +154,7 @@ namespace XHelper
             txt_Keywords.SelectedIndex = 0;
 
             InitializeUIControls();
-
+            **/
         }
 
 

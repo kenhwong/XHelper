@@ -13,6 +13,7 @@ namespace XHelper
 
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public string ReleaseID { get; set; }
         public string ReleaseName { get; set; }
