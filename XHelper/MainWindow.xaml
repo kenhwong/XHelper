@@ -11,6 +11,7 @@
         <ResourceDictionary>
             <local:NRefFrameConverter x:Key="NRefFConverter" />
             <local:MachineSizeConverter x:Key="MSizeConverter" />
+            <local:VarToBoolConverter x:Key="V2BConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style/CommonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -149,45 +150,53 @@
                         x:Name="bnNMBrowse" ToolTip="Browse new movie file..." 
                         Width="20" Height="20" Margin="10,5,10,0" />
             </StackPanel>
-            <StackPanel Grid.Row="2" Orientation="Vertical" Margin="10,0">
-                <Label Content="{Binding Path=MediaFilesDecodeDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=None.}" ContentStringFormat="Media Information: {0}" />
-                <WrapPanel>
-                    <Label Style="{DynamicResource TagLableSmall}" Tag="fmt" Content="{Binding Path=VFormat, TargetNullValue=Unknown}" Foreground="Green" />
-                    <Label Style="{DynamicResource TagLableSmall}" Tag="res" Foreground="Green">
-                        <Label.Content>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0}*{1}" TargetNullValue="Unknown">
-                                        <Binding Path="VWidth" />
-                                        <Binding Path="VHeight" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </Label.Content>
-                    </Label>
-                    <Label Style="{DynamicResource TagLableSmall}" Tag="dur" Foreground="Green">
-                        <Label.Content>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0}:{1}:{2}" TargetNullValue="Unknown">
-                                        <Binding Path="MediaFilesTotalLength.Hours" />
-                                        <Binding Path="MediaFilesTotalLength.Minutes" />
-                                        <Binding Path="MediaFilesTotalLength.Seconds" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </Label.Content>
-                    </Label>
-                    <Label Style="{DynamicResource TagLableSmall}" Tag="size"  Foreground="Green"
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,0">
+                <Label Style="{DynamicResource TagLableSmall}" Tag="fmt" Content="{Binding Path=VFormat, TargetNullValue=Unknown}" Foreground="Green" />
+                <Label Style="{DynamicResource TagLableSmall}" Tag="res" Foreground="Green">
+                    <Label.Content>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}*{1}" TargetNullValue="Unknown">
+                                    <Binding Path="VWidth" />
+                                    <Binding Path="VHeight" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Label.Content>
+                </Label>
+                <Label Style="{DynamicResource TagLableSmall}" Tag="dur" Foreground="Green">
+                    <Label.Content>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}:{1}:{2}" TargetNullValue="Unknown">
+                                    <Binding Path="MediaFilesTotalLength.Hours" />
+                                    <Binding Path="MediaFilesTotalLength.Minutes" />
+                                    <Binding Path="MediaFilesTotalLength.Seconds" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Label.Content>
+                </Label>
+                <Label Style="{DynamicResource TagLableSmall}" Tag="size"  Foreground="Green"
                            Content="{Binding Path=MediaFilesTotalSize, Converter={StaticResource MSizeConverter}, TargetNullValue=--}" />
-                    <Label Style="{DynamicResource TagLableSmall}" Tag="nreff"  Foreground="Green"
+                <Label Style="{DynamicResource TagLableSmall}" Tag="nreff"  Foreground="Green"
                            Content="{Binding Path=NRefFrame, Converter={StaticResource NRefFConverter}, TargetNullValue=--}" />
-                </WrapPanel>
             </StackPanel>
             <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10">
-                <Label Content="KEY:" />
-                <ComboBox Width="150" />
-                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearchR}" x:Name="bnNMSearch" ToolTip="Search movie from javbus..." Width="20" Height="20" Margin="10,0" />
+                <Label Content="KEY:" Target="{Binding ElementName=txtNMKeyword}" />
+                <ComboBox x:Name="txtNMKeyword" Width="150" IsEditable="True" IsReadOnly="False" />
+                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearchR}" x:Name="bnNMQuery" ToolTip="Search movie from javbus..." Width="20" Height="20" Margin="10,0" />
+                <WrapPanel x:Name="subbuttongroup_SelectPanels" DockPanel.Dock="Top" Margin="0" Orientation="Horizontal" Visibility="Visible">
+                    <RadioButton Content="B" GroupName="gQueryWeb" 
+                                 IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=BSite, Converter={StaticResource V2BConverter}}" />
+                    <RadioButton Content="L" GroupName="gQueryWeb" 
+                                 IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=LSite, Converter={StaticResource V2BConverter}}" />
+                    <RadioButton Content="C" GroupName="gQueryWeb" 
+                                 IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=CSite, Converter={StaticResource V2BConverter}}" />
+                    <RadioButton Content="U" GroupName="gQueryWeb" 
+                                 IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=USite, Converter={StaticResource V2BConverter}}" />
+                    <Label Content="{Binding Path=NewMovieQuerySite.QName}" ContentStringFormat="Name: {0}" Foreground="Green" />
+                </WrapPanel>
             </StackPanel>
             <StackPanel Grid.Row="4" Margin="10">
                 <GroupBox Header="Search Result..." Margin="0">

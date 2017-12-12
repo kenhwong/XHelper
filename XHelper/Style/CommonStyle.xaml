@@ -24,6 +24,36 @@
     <Geometry x:Key="RepeatButton">M3.5445026,0 L7.0890052,7.0890053 L3.0459049E-09,7.0890053 z</Geometry>
     <Geometry x:Key="ComboBoxArrow">M-0,6 L-0,8 8,8 8,-0 6,-0 6,6 z</Geometry>
     <Geometry x:Key="ExpanderToggleButtonArrow">M5,-0 L9,5 1,5 z</Geometry>
+    <Geometry x:Key="IconDropDown1">M697.0368 568.2176c8.2944 0 14.848 6.5536 14.848 14.848v216.7808l79.872-79.872
+        c2.7648-2.8672 6.656-4.5056 10.752-4.5056 3.8912 0 7.4752 1.4336 10.1376 3.9936 5.8368 5.5296 6.0416 15.1552 0.512 20.8896
+        L707.072 846.5408l-0.1024 0.1024c-2.4576 2.7648-5.9392 4.1984-9.8304 4.1984-3.9936 0-7.68-1.536-10.5472-4.4032
+        l-105.472-105.3696c-2.7648-2.8672-4.1984-6.7584-4.096-10.752 0.1024-3.8912 1.7408-7.4752 4.608-10.0352l0.1024-0.1024
+        c2.8672-2.7648 6.5536-4.1984 10.5472-4.1984 3.8912 0 7.4752 1.4336 10.1376 4.096l79.7696 79.7696V583.0656c0-8.192 6.656-14.848 14.848-14.848z
+        M284.0576 847.0528c-28.9792 0-56.5248-11.4688-77.312-32.3584-20.8896-20.7872-32.3584-48.3328-32.3584-77.312V281.9072
+        c0-28.9792 11.4688-56.5248 32.3584-77.312 20.7872-20.8896 48.3328-32.3584 77.312-32.3584H739.328c28.9792 0 56.5248 11.4688 77.312 32.3584
+        C837.4272 225.3824 848.896 252.928 848.896 281.9072l-1.024 301.4656c0 9.9328-8.192 18.0224-18.3296 18.0224s-18.3296-8.192-18.3296-18.3296
+        l1.024-301.4656c0-19.456-7.4752-37.5808-21.0944-51.2-13.4144-13.4144-32.0512-21.0944-51.2-21.0944H284.0576
+        c-19.456 0-37.5808 7.4752-51.2 21.0944-13.4144 13.4144-21.0944 32.0512-21.0944 51.2v455.8848c0 18.8416 7.8848 37.9904 21.0944 51.2 13.4144 13.4144 32.0512 21.0944 51.2 21.0944
+        h301.1584c10.1376 0 18.3296 8.3968 18.6368 19.0464 0 10.0352-8.2944 18.2272-18.3296 18.2272H284.0576z
+        M315.8016 674.4064c-10.1376 0-18.3296-8.192-18.3296-18.3296 0-10.1376 8.192-18.3296 18.3296-18.3296h6.144v-0.3072h150.3232
+        c6.3488 0 12.6976 3.6864 16.0768 9.4208 3.2768 5.632 3.2768 12.5952 0 18.2272-3.3792 5.7344-9.728 9.4208-16.0768 9.4208H315.8016z
+        M566.272 527.6672c-76.0832 0-214.7328-0.1024-244.736-0.2048v-0.1024h-6.144c-10.1376 0-18.3296-8.192-18.3296-18.3296 0-10.1376 8.192-18.3296 18.3296-18.3296
+        h250.88c6.3488 0 12.6976 3.6864 16.0768 9.4208 3.2768 5.632 3.2768 12.5952 0 18.2272-3.3792 5.632-9.6256 9.3184-16.0768 9.3184z
+        M315.392 380.8256c-10.1376 0-18.3296-8.192-18.3296-18.3296 0-10.1376 8.192-18.3296 18.3296-18.3296
+        h392.8064c10.1376 0 18.3296 8.192 18.3296 18.3296 0 10.1376-8.192 18.3296-18.3296 18.3296H315.392z</Geometry>
+    <Geometry x:Key="IconDropDown2">M603.462 143.023h-365.844c-50.51 0-91.462 40.952-91.462 91.462v365.762c0 50.51 40.952 91.462 91.462 91.462h45.73v-62.046
+        h-41.034c-23.237 0-42.023-19.117-42.023-42.682v-341.455c0-23.566 17.963-48.45 41.198-48.45h346.316c23.237 0 46.143 24.884 46.143 48.45v34.689
+        h60.974v-45.73c0-50.51-40.952-91.462-91.462-91.462z
+        M786.384 325.947h-365.844c-50.51 0-91.462 40.952-91.462 91.461v365.762c0 50.51 40.952 91.462 91.462 91.462
+        h147.326v-59.573h-138.84c-23.318 0-42.188-18.869-42.188-42.188v-343.68c0-23.236 18.869-47.131 42.188-47.131h337.17c23.237 0 50.345 18.869 50.345 42.188v222.72
+        h15.49v0.082h45.73v-229.642c0-50.51-40.952-91.461-91.379-91.461z
+        M582.372 731.559l39.911-39.91 149.096 149.096-39.911 39.91z
+        M840.706 691.678l39.91 39.91-149.095 149.096-39.911-39.911z</Geometry>
+    <Geometry x:Key="IconDropDown3">M162.909091 93.090909h698.181818A69.818182 69.818182 0 0 1 930.909091 162.909091v698.181818a69.818182 69.818182 0 0 1-69.818182 69.818182
+        h-698.181818A69.818182 69.818182 0 0 1 93.090909 861.090909v-698.181818A69.818182 69.818182 0 0 1 162.909091 93.090909z 
+        m0 46.545455a23.272727 23.272727 0 0 0-23.272727 23.272727v698.181818a23.272727 23.272727 0 0 0 23.272727 23.272727h698.181818a23.272727 23.272727 0 
+        0 0 23.272727-23.272727v-698.181818a23.272727 23.272727 0 0 0-23.272727-23.272727h-698.181818z m560.686545 260.468363a23.272727 23.272727 0 0 1 32.907637 32.907637
+        l-246.830546 246.877091-246.877091-246.877091a23.272727 23.272727 0 1 1 32.954182-32.907637l213.922909 213.922909 213.922909-213.922909z</Geometry>
     <Geometry x:Key="IconDropDown">M938 483H86c-20.2 0-36.5 16.3-36.5 36.5S65.8 556 86 556h852c20.2 0 36.5-16.3 36.5-36.5S958.2 483 938 483z 
         m0 365.1H86c-20.2 0-36.5 16.3-36.5 36.5s16.3 36.5 36.5 36.5h852c20.2 0 36.5-16.3 36.5-36.5s-16.3-36.5-36.5-36.5zM86 190.9h852c20.2 0 36.5-16.3 36.5-36.5S958.2 117.9 938 117.9
         H86c-20.2 0-36.5 16.3-36.5 36.5s16.3 36.5 36.5 36.5z</Geometry>
@@ -792,11 +822,13 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+
     </Style>
     <Style x:Key="TagLableSmall" TargetType="{x:Type Label}" BasedOn="{StaticResource baseStyle}">
         <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
         <Setter Property="FontFamily" Value="Consolas" />
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
@@ -811,7 +843,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <Border x:Name="G1" Grid.Column="0" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="{TemplateBinding Foreground}" CornerRadius="3,0,0,3" Padding="3,1">
-                            <TextBlock Name="TagPart" Text="{TemplateBinding Tag}" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FFDDFFDD" />
+                            <TextBlock Name="TagPart" Text="{TemplateBinding Tag}" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" />
                         </Border>
                         <Border x:Name="G2" Grid.Column="1" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="Transparent" CornerRadius="0,3,3,0" Padding="5,1">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
@@ -828,6 +860,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+
     </Style>
 
     <Style x:Key="IconLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource baseStyle}">
@@ -2125,21 +2158,19 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
     <Style TargetType="{x:Type ComboBoxItem}">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
-                    <Border Name="Border" Padding="5" Margin="2" BorderThickness="1" CornerRadius="0" Background="Transparent" BorderBrush="Transparent" >
-                        <TextBlock TextAlignment="Center">
+                    <Border Name="Border" Padding="2,1" Margin="1" BorderThickness="1" CornerRadius="0" Background="Transparent" BorderBrush="Transparent" >
+                        <TextBlock TextAlignment="Left">
                             <ContentPresenter />
                         </TextBlock>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="true">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="Gray"/>
-                            <Setter TargetName="Border" Property="Background" Value="Yellow"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#FF80C080"/>
+                            <Setter TargetName="Border" Property="Background" Value="#5F80C080"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -2158,8 +2189,9 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                         </Grid.ColumnDefinitions>
                         <Border x:Name="Border" Grid.Column="0" Background="Transparent" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" />
                         <Path x:Name="Arrow" Grid.Column="1" Fill="{TemplateBinding BorderBrush}" StrokeThickness="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
-                              Width="20" Height="15" Stretch="Fill"
-                              Data="{StaticResource IconDropDown}"/>
+                              Width="15" Height="15" Stretch="Fill"
+                              Data="{StaticResource IconDropDown1}"/>
+                        <Border Grid.Column="1" Background="{x:Static SystemColors.ControlBrush}" Opacity="0" BorderThickness="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
@@ -2180,6 +2212,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
         <Setter Property="Foreground" Value="Gray" />
         <Setter Property="BorderBrush" Value="#FF808080" />
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
@@ -2211,11 +2244,11 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                             ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                             Margin="10,3,30,3"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Center" />
+                            HorizontalAlignment="Left" />
                         <TextBox
                             x:Name="PART_EditableTextBox"
                             Template="{StaticResource ComboBoxTextBox}"
-                            HorizontalAlignment="Center"
+                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Margin="0"
                             Focusable="True"
@@ -2231,7 +2264,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                             VerticalOffset="2">
                             <Grid Name="DropDown" MinWidth="{TemplateBinding FrameworkElement.ActualWidth}" MaxHeight="{TemplateBinding ComboBox.MaxDropDownHeight}">
                                 <Border x:Name="DropDownBorder" Background="White" BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" />
-                                <ScrollViewer Margin="4,6,4,6">
+                                <ScrollViewer Margin="5">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
                             </Grid>
@@ -2261,7 +2294,6 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
         <Style.Triggers>
         </Style.Triggers>
     </Style>
-
     <!--#endregion-->
 
 </ResourceDictionary>

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -24,9 +26,14 @@ namespace XHelper
     {
         private MovieInfo _newMovieInfo = new MovieInfo();
         public MovieInfo NewMovieInfo { get { return _newMovieInfo; } set { _newMovieInfo = value; OnPropertyChanged(nameof(NewMovieInfo)); } }
+        private XQuerySite _newMovieQuerySite = new XQuerySite();
+        public XQuerySite NewMovieQuerySite { get { return _newMovieQuerySite; } set { _newMovieQuerySite = value; OnPropertyChanged(nameof(NewMovieQuerySite)); } }
+        private HtmlDocument _currentHtmlDocument = new HtmlDocument();
+        public HtmlDocument CurrentHtmlDocument { get { return _currentHtmlDocument; } set { _currentHtmlDocument = value; OnPropertyChanged(nameof(CurrentHtmlDocument)); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
 
         public MainWindow()
         {
@@ -37,6 +44,7 @@ namespace XHelper
         }
 
         public RoutedCommand cmdNMBrowse = new RoutedCommand("CommandNewMovieBrowse", typeof(MainWindow));
+        public RoutedCommand cmdNMQuery = new RoutedCommand("CommandNewMovieQuery", typeof(MainWindow));
         private void InitializeCommand()
         {
             var cbQuit = new CommandBinding(ApplicationCommands.Close,
@@ -45,7 +53,6 @@ namespace XHelper
             CommandBinding cbNMBrowse = new CommandBinding(cmdNMBrowse,
                 (sender, e) =>
                 {
-                    //IsReadyProcess = false;
                     NewMovieInfo = new MovieInfo();
 
                     Microsoft.Win32.OpenFileDialog ofd_selectmovie = new Microsoft.Win32.OpenFileDialog();
@@ -55,27 +62,127 @@ namespace XHelper
                     if (result.HasValue && result.Value)
                     {
                         txtNMFullFileName.Text = ofd_selectmovie.FileName;
-                        Func_OpenNewMovieFile(ofd_selectmovie.FileName);
+                        Func_NMOpenMediaFile(ofd_selectmovie.FileName);
                     }
                     e.Handled = true;
                 },
                 (sender, e) => { e.CanExecute = true; e.Handled = true; });
+            CommandBinding cbNMQuery = new CommandBinding(cmdNMQuery,
+                (sender, e) =>
+                {
+                    Func_NMQueryRecordAsync(NewMovieQuerySite.QName, txtNMKeyword.Text);
+
+
+                    e.Handled = true;
+                },
+                (sender, e) => { e.CanExecute = true; e.Handled = true; });
+
 
             bnNMBrowse.Command = cmdNMBrowse;
+            bnNMQuery.Command = cmdNMQuery;
 
-            this.CommandBindings.AddRange(new CommandBinding[] { cbNMBrowse, cbQuit });
+            this.CommandBindings.AddRange(new CommandBinding[] { cbNMBrowse, cbQuit, cbNMQuery });
 
         }
 
+        private async void Func_NMQueryRecordAsync(string qName, string keyword)
+        {
+            //XGlobal.RebuildSubDirTemp();
 
-        private void Func_OpenNewMovieFile(string _filename)
+            listInformation.SelectedIndex = listInformation.Items.Add($"QUERY: {NewMovieQuerySite.QUri.Host.ToUpper()} / KEY: {keyword}...");
+
+            Uri uri_search = new Uri($"https://{NewMovieQuerySite.QUri}/ja/search/{WebUtility.UrlEncode(keyword.Trim())}");
+            var streamresult = await XService.Func_Net_ReadWebData(uri_search);
+
+            if (streamresult.Contains("System.Net.Http.HttpRequestException:"))
+            {
+                System.Diagnostics.Debug.WriteLine(uri_search.ToString());
+                System.Diagnostics.Debug.WriteLine(streamresult);
+                return;
+            }
+
+            if (streamresult == HttpStatusCode.NotFound.ToString())
+            {
+                MessageBox.Show("404", "Key Words Mismatch");
+                txtNMKeyword.Focus();
+                return;
+            }            
+
+            CurrentHtmlDocument.LoadHtml(streamresult);
+            HtmlNode hnode = CurrentHtmlDocument.DocumentNode;
+            HtmlNode _errornode = null;
+            switch(NewMovieQuerySite.QName)
+            {
+                case "CSite":
+                case "USite":
+                    _errornode = hnode.SelectSingleNode("//div[@class='alert alert-block alert-error']");
+                    break;
+                case "BSite":
+                    _errornode = hnode.SelectSingleNode("//div[@class='alert alert-danger alert-page']");
+                    break;
+                default:
+                    break;
+            }
+/**
+            if (_errornode != null)
+            {
+                gallery_SearchResult.Gallery.Groups[0].Caption = _errornode.SelectSingleNode("./h4").InnerText;
+                MessageBox.Show(_errornode.InnerText, "Key Words Mismatch");
+                txt_Keywords.Focus();
+                return;
+            }
+
+            list_ProcessInformation.SelectedIndex = list_ProcessInformation.Items.Add($"從 {SPKEY.ToUpper()} 返回 {txt_Keywords.Text} 相關影片...");
+
+            #region 讀取搜索結果
+            HtmlNodeCollection node_results = CurrentHtmlDocument.DocumentNode.SelectNodes("//div[@class='item']");
+
+            gallery_SearchResult.Gallery.Groups[0].Items.Clear();
+            gallery_SearchResult.Gallery.Groups[0].Caption = $"Searched with [{txt_Keywords.Text}], {node_results.Count} results returned:";
+
+            foreach (HtmlNode _node in node_results)
+            {
+                Stream tempimg = await XGlobal.FnReadWebStream(_node.SelectSingleNode(".//img").Attributes["src"].Value, uri_search);
+                GalleryItem gi = new GalleryItem();
+                if (tempimg != null)
+                {
+                    gi.Caption = $"{_node.SelectSingleNode(".//date[1]").InnerText} / {_node.SelectSingleNode(".//date[2]").InnerText}";
+                    _node.SelectSingleNode(".//span[1]").RemoveAll();
+                    gi.Description = _node.SelectSingleNode(".//span[1]").InnerText;
+                    //gi.Glyph = new BitmapImage() { StreamSource = tempimg };
+                    gi.Glyph = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource;
+                    gi.Tag = XGlobal.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value);
+                    gallery_SearchResult.Gallery.Groups[0].Items.Add(gi);
+                }
+                else
+                {
+                    gi.Caption = $"{_node.SelectSingleNode(".//date[1]").InnerText} / {_node.SelectSingleNode(".//date[2]").InnerText}";
+                    _node.SelectSingleNode(".//span[1]").RemoveAll();
+                    gi.Description = _node.SelectSingleNode(".//span[1]").InnerText;
+                    gi.Glyph = new BitmapImage(new Uri("Resources/404.png", UriKind.Relative));
+                    gi.Tag = XGlobal.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value);
+                    gallery_SearchResult.Gallery.Groups[0].Items.Add(gi);
+                }
+                gi.Command = Command_SelectResult;
+                gi.CommandTarget = list_ProcessInformation;
+                gi.CommandParameter = gi;
+            }//end foreach in node_results
+            #endregion
+
+            **/
+        }
+
+        #region Function: Add New Movie, Open Media File
+        /// <summary>
+        /// Function: Add New Movie, Open Media File
+        /// </summary>
+        /// <param name="_filename">New media file full name</param>
+        private void Func_NMOpenMediaFile(string _filename)
         {
             NewMovieInfo = new MovieInfo(_filename);
-            /**
-            //mi_current.SourceMediaFileExt = Path.GetExtension(_filename);
-            //mi_current.TotalMoviesSize = XHelper.IOHelper_GetMoviesTotalSize(mi_current.SourcePath, mi_current.SourceMediaFileExt);
-
-            txt_Keywords.Items.Clear();
+            NewMovieInfo.SourceMediaFileExt = System.IO.Path.GetExtension(_filename);
+            txtNMKeyword.Items.Clear();
+            NewMovieQuerySite = new XQuerySite("BSite");
 
             Match _match_heyzo = Regex.Match(_filename, @"hey.*?(\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             Match _match_caribbean = Regex.Match(_filename, @"carib.*?(\d+[_-]\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
@@ -84,79 +191,32 @@ namespace XHelper
             Match _match_3d2d = Regex.Match(_filename, @"([a-z|A-Z]+3d(?:2d)?[a-z|A-Z]*\-?\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             Match _match_bd = Regex.Match(_filename, @"([a-z|A-Z]+bd\-?[a-z|A-Z]?\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             Match _match_tokyohot = Regex.Match(_filename, @"(n\d{4,})", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            //(ps\d|set|lfm|pss|lovu|xms|ykt|swm)_\d+?_[a-z]+\d*
-            Match _match_scute1 = Regex.Match(_filename, @"((?:\d+?|set)_[a-z]+?_\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            Match _match_scute2 = Regex.Match(_filename, @"((?:ps\d|set|lfm|pss|lovu|xms|ykt|swm)_\d+?_[a-z]+\d*)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
-            bn_SearchSOX.UpdateDefaultStyle();
-            bn_SearchMOO.UpdateDefaultStyle();
 
-            var greenbrush = new SolidColorBrush(Colors.Green);
-            if (_match_heyzo.Success)
-            {
-                txt_Keywords.Items.Add("heyzo " + _match_heyzo.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
-            else if (_match_caribbean.Success)
-            {
-                txt_Keywords.Items.Add(_match_caribbean.Groups[1].Value);
-                bn_SearchSOX.Foreground = new SolidColorBrush(Colors.Green);
-                bn_SearchMOO.UpdateDefaultStyle();
-            }
-            else if (_match_1pondo.Success)
-            {
-                txt_Keywords.Items.Add(_match_1pondo.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
-            else if (_match_nums.Success)
-            {
-                txt_Keywords.Items.Add(_match_nums.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
-            else if (_match_3d2d.Success)
-            {
-                txt_Keywords.Items.Add(_match_3d2d.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
-            else if (_match_bd.Success)
-            {
-                txt_Keywords.Items.Add(_match_bd.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
-            else if (_match_tokyohot.Success)
-            {
-                txt_Keywords.Items.Add(_match_tokyohot.Groups[1].Value);
-                bn_SearchSOX.Foreground = greenbrush;
-                IsCensored = false;
-            }
+            if (_match_heyzo.Success) { txtNMKeyword.Items.Add("heyzo " + _match_heyzo.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_caribbean.Success) { txtNMKeyword.Items.Add(_match_caribbean.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_1pondo.Success) { txtNMKeyword.Items.Add(_match_1pondo.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_nums.Success) { txtNMKeyword.Items.Add(_match_nums.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_3d2d.Success) { txtNMKeyword.Items.Add(_match_3d2d.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_bd.Success) { txtNMKeyword.Items.Add(_match_bd.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
+            else if (_match_tokyohot.Success) { txtNMKeyword.Items.Add(_match_tokyohot.Groups[1].Value); NewMovieQuerySite.ChangeTo("USite"); }
             else
             {
-                //MatchCollection _mc = Regex.Matches(System.IO.Path.GetFileNameWithoutExtension(ofd.FileName), @"([a-z|A-Z]+\-?\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                 MatchCollection _mc = Regex.Matches(_filename, @"([a-z|A-Z]+\-?\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                 foreach (Match _m in _mc)
                 {
                     if (_m.Groups[1].Value == "whole1") continue;
                     if (_m.Groups[1].Value == "hd1") continue;
                     if (_m.Groups[1].Value == "mp4") continue;
-                    txt_Keywords.Items.Add(Regex.Replace(_m.Groups[1].Value, @"0+", "0"));
+                    txtNMKeyword.Items.Add(Regex.Replace(_m.Groups[1].Value, @"0+", "0"));
                 }
-                //_mc = Regex.Matches(System.IO.Path.GetFileNameWithoutExtension(ofd.FileName), @"(\d+[_-]\d+)|(\d+_[a-z|A-Z]+_\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                 _mc = Regex.Matches(_filename, @"(\d+[_-]\d+)|(\d+_[a-z|A-Z]+_\d+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-                foreach (Match _m in _mc) txt_Keywords.Items.Add(_m.Groups[1].Value);
-                bn_SearchSOX.UpdateDefaultStyle();
-                bn_SearchMOO.Foreground = greenbrush;
+                foreach (Match _m in _mc) txtNMKeyword.Items.Add(_m.Groups[1].Value);
+                NewMovieQuerySite.ChangeTo("CSite");
             }
-            txt_Keywords.SelectedIndex = 0;
-
-            InitializeUIControls();
-            **/
+            txtNMKeyword.SelectedIndex = 0;
         }
-
+        #endregion
 
         private void listInformation_SelectionChanged(object sender, SelectionChangedEventArgs e) { var lb = sender as ListBox; lb.ScrollIntoView(lb.Items[lb.Items.Count - 1]); }
     }
