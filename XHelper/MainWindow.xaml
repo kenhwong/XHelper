@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XHelper"
         mc:Ignorable="d"
@@ -12,6 +13,7 @@
             <local:NRefFrameConverter x:Key="NRefFConverter" />
             <local:MachineSizeConverter x:Key="MSizeConverter" />
             <local:VarToBoolConverter x:Key="V2BConverter" />
+            <local:TrimmedTextConverter x:Key="TrimStringConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style/CommonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -199,12 +201,21 @@
                 </WrapPanel>
             </StackPanel>
             <StackPanel Grid.Row="4" Margin="10">
-                <GroupBox Header="Search Result..." Margin="0">
-                    <ListBox>
-                        <ListBoxItem Content="AAA" />
-                        <ListBoxItem Content="AAA" />
-                        <ListBoxItem Content="AAA" />
-                    </ListBox>
+                <GroupBox x:Name="gbNMQueryResult" Margin="0,5,10,5" Style="{DynamicResource ListGroupStyle}" Header="Query Result" Padding="10" Foreground="{StaticResource CyanBrush}">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"  Margin="0">
+                        <ListBox x:Name="lbNMQueryResult" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=NewMovieQueryResult}" IsSynchronizedWithCurrentItem="False">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" />
+                                        <Label Padding="5,0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />
+                                        <Label Padding="5,0" Content="{Binding Path=ReleaseID}" />
+                                        <Label Padding="5,0" Content="{Binding Path=ReleaseDate}" ContentStringFormat="{}{0:MM-dd-yyyy}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
                 </GroupBox>
             </StackPanel>
         </Grid>

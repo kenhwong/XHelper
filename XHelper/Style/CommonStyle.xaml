@@ -995,6 +995,50 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
     <Style TargetType="{x:Type Button}" x:Key="SubButtonStyle" BasedOn="{StaticResource ButtonBaseStyle}">
         <Setter Property="Background" Value="#f0f0f0" />
     </Style>
+
+    <Style x:Key="GalleryItemButton" TargetType="{x:Type Button}" BasedOn="{StaticResource baseStyle}">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#FF808080"/>
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource AFocusVisualStyte}" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" Background="{x:Static SystemColors.ControlBrush}" Opacity="0" Margin="0">
+                        <ContentPresenter Grid.Row="1" Name="contentPresenter" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    HorizontalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="#d2d2d2" />
+                            <Setter Property="Effect" Value="{x:Null}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="Green" />
+                            <Setter Property="BorderBrush" Value="Green" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource CyanBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!--#endregion-->
 
     <!--#region TextBox-->
@@ -1731,7 +1775,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
             </Setter.Value>
         </Setter>
     </Style>
-<!--#endregion-->
+    <!--#endregion-->
 
     <!--#region AndroidRadioButtonStyle-->
     <Style x:Key="AndroidRadioButtonStyle" TargetType="RadioButton" BasedOn="{StaticResource baseStyle}">

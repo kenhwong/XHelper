@@ -1,7 +1,9 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -30,6 +32,8 @@ namespace XHelper
         public XQuerySite NewMovieQuerySite { get { return _newMovieQuerySite; } set { _newMovieQuerySite = value; OnPropertyChanged(nameof(NewMovieQuerySite)); } }
         private HtmlDocument _currentHtmlDocument = new HtmlDocument();
         public HtmlDocument CurrentHtmlDocument { get { return _currentHtmlDocument; } set { _currentHtmlDocument = value; OnPropertyChanged(nameof(CurrentHtmlDocument)); } }
+        private ObservableCollection<QueryResultMovieInfo> _newMovieQueryResult = new ObservableCollection<QueryResultMovieInfo>();
+        public ObservableCollection<QueryResultMovieInfo> NewMovieQueryResult { get { return _newMovieQueryResult; } set { _newMovieQueryResult = value; OnPropertyChanged(nameof(NewMovieQueryResult)); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -71,8 +75,6 @@ namespace XHelper
                 (sender, e) =>
                 {
                     Func_NMQueryRecordAsync(NewMovieQuerySite.QName, txtNMKeyword.Text);
-
-
                     e.Handled = true;
                 },
                 (sender, e) => { e.CanExecute = true; e.Handled = true; });
@@ -91,7 +93,7 @@ namespace XHelper
 
             listInformation.SelectedIndex = listInformation.Items.Add($"QUERY: {NewMovieQuerySite.QUri.Host.ToUpper()} / KEY: {keyword}...");
 
-            Uri uri_search = new Uri($"https://{NewMovieQuerySite.QUri}/ja/search/{WebUtility.UrlEncode(keyword.Trim())}");
+            Uri uri_search = new Uri($"{NewMovieQuerySite.QUri}ja/search/{WebUtility.UrlEncode(keyword.Trim())}");
             var streamresult = await XService.Func_Net_ReadWebData(uri_search);
 
             if (streamresult.Contains("System.Net.Http.HttpRequestException:"))
@@ -106,12 +108,12 @@ namespace XHelper
                 MessageBox.Show("404", "Key Words Mismatch");
                 txtNMKeyword.Focus();
                 return;
-            }            
+            }
 
             CurrentHtmlDocument.LoadHtml(streamresult);
             HtmlNode hnode = CurrentHtmlDocument.DocumentNode;
             HtmlNode _errornode = null;
-            switch(NewMovieQuerySite.QName)
+            switch (NewMovieQuerySite.QName)
             {
                 case "CSite":
                 case "USite":
@@ -120,56 +122,50 @@ namespace XHelper
                 case "BSite":
                     _errornode = hnode.SelectSingleNode("//div[@class='alert alert-danger alert-page']");
                     break;
+                case "LSite":
+                    break;
                 default:
                     break;
             }
-/**
+
             if (_errornode != null)
             {
-                gallery_SearchResult.Gallery.Groups[0].Caption = _errornode.SelectSingleNode("./h4").InnerText;
+                gbNMQueryResult.Header = $"Query Result: {_errornode.SelectSingleNode("./h4").InnerText}";
                 MessageBox.Show(_errornode.InnerText, "Key Words Mismatch");
-                txt_Keywords.Focus();
+                txtNMKeyword.Focus();
                 return;
             }
 
-            list_ProcessInformation.SelectedIndex = list_ProcessInformation.Items.Add($"從 {SPKEY.ToUpper()} 返回 {txt_Keywords.Text} 相關影片...");
 
             #region 讀取搜索結果
+            NewMovieQueryResult.Clear();
             HtmlNodeCollection node_results = CurrentHtmlDocument.DocumentNode.SelectNodes("//div[@class='item']");
-
-            gallery_SearchResult.Gallery.Groups[0].Items.Clear();
-            gallery_SearchResult.Gallery.Groups[0].Caption = $"Searched with [{txt_Keywords.Text}], {node_results.Count} results returned:";
+            gbNMQueryResult.Header = $"Query Result: {NewMovieQuerySite.QUri.Host.ToUpper()} / {keyword} / {node_results.Count}";
 
             foreach (HtmlNode _node in node_results)
             {
-                Stream tempimg = await XGlobal.FnReadWebStream(_node.SelectSingleNode(".//img").Attributes["src"].Value, uri_search);
-                GalleryItem gi = new GalleryItem();
-                if (tempimg != null)
-                {
-                    gi.Caption = $"{_node.SelectSingleNode(".//date[1]").InnerText} / {_node.SelectSingleNode(".//date[2]").InnerText}";
-                    _node.SelectSingleNode(".//span[1]").RemoveAll();
-                    gi.Description = _node.SelectSingleNode(".//span[1]").InnerText;
-                    //gi.Glyph = new BitmapImage() { StreamSource = tempimg };
-                    gi.Glyph = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource;
-                    gi.Tag = XGlobal.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value);
-                    gallery_SearchResult.Gallery.Groups[0].Items.Add(gi);
-                }
-                else
-                {
-                    gi.Caption = $"{_node.SelectSingleNode(".//date[1]").InnerText} / {_node.SelectSingleNode(".//date[2]").InnerText}";
-                    _node.SelectSingleNode(".//span[1]").RemoveAll();
-                    gi.Description = _node.SelectSingleNode(".//span[1]").InnerText;
-                    gi.Glyph = new BitmapImage(new Uri("Resources/404.png", UriKind.Relative));
-                    gi.Tag = XGlobal.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value);
-                    gallery_SearchResult.Gallery.Groups[0].Items.Add(gi);
-                }
-                gi.Command = Command_SelectResult;
-                gi.CommandTarget = list_ProcessInformation;
-                gi.CommandParameter = gi;
-            }//end foreach in node_results
-            #endregion
+                Stream tempimg = await XService.Func_Net_ReadWebStream(_node.SelectSingleNode(".//img").Attributes["src"].Value, uri_search);
+                QueryResultMovieInfo mi = new QueryResultMovieInfo();
+                mi.ReleaseID = _node.SelectSingleNode(".//date[1]").InnerText;
+                _node.SelectSingleNode(".//span[1]/date[1]").Remove();
+                mi.ReleaseDate = Convert.ToDateTime(_node.SelectSingleNode(".//date[1]").InnerText);
+                _node.SelectSingleNode(".//span[1]/date[1]").Remove();
+                _node.SelectSingleNode(".//span[1]/div[1]").Remove();
+                mi.ReleaseName = _node.SelectSingleNode(".//span[1]").InnerText.Trim(new char[] { ' ', '/' });
+                //gi.Glyph = new BitmapImage() { StreamSource = tempimg };
+                mi.MovieCoverImage = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource;
+                mi.OfficialWeb = new Uri(XService.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value));
+                NewMovieQueryResult.Add(mi);
 
-            **/
+                //gi.Command = Command_SelectResult;
+                //gi.CommandTarget = list_ProcessInformation;
+                //gi.CommandParameter = gi;
+            }//end foreach in node_results
+            //lbNMQueryResult.ItemsSource = null;
+            //lbNMQueryResult.ItemsSource = NewMovieQueryResult;
+            #endregion
+            /**
+                        **/
         }
 
         #region Function: Add New Movie, Open Media File
@@ -219,5 +215,6 @@ namespace XHelper
         #endregion
 
         private void listInformation_SelectionChanged(object sender, SelectionChangedEventArgs e) { var lb = sender as ListBox; lb.ScrollIntoView(lb.Items[lb.Items.Count - 1]); }
+
     }
 }

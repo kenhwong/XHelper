@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
@@ -25,7 +26,7 @@ namespace XHelper
 
         static XGlobal()
         {
-            CurrentContext = new XContext();
+            CurrentContext = XContext.Instance;
 
             ServicePointManager.DefaultConnectionLimit = 512;
             HttpClientHandler handler = new HttpClientHandler()
@@ -51,8 +52,11 @@ namespace XHelper
 
 
     [Serializable]
-    public class XContext
+    public sealed class XContext
     {
+        private static readonly XContext instance = new XContext();
+        public static XContext Instance { get { return instance; } }
+
         public List<StarInfo> TotalStars { get; set; }
         public List<MovieInfo> TotalMovies { get; set; }
 
@@ -70,7 +74,8 @@ namespace XHelper
         public bool UseProxy { get; set; }
         public IWebProxy SSProxy { get; set; }
 
-        public XContext()
+        //private XContext() { }
+        private XContext()
         {
             HttpClient = new HttpClient();
             HttpCTS = new CancellationTokenSource();
@@ -194,6 +199,22 @@ namespace XHelper
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value.Equals(true) ? parameter : System.Windows.Data.Binding.DoNothing;
+        }
+    }
+
+    public class TrimmedTextConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string otext = value as string;
+            int len = int.Parse(parameter as string);
+            return otext.Substring(0, len);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
     #endregion

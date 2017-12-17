@@ -5,6 +5,8 @@ using MediaInfoDotNet;
 using System.Drawing;
 using System.Linq;
 using System.ComponentModel;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace XHelper
 {
@@ -82,6 +84,11 @@ namespace XHelper
                     XService.Format_MachineSize(MediaFilesTotalSize),
                     MediaFiles[0].Type2D3D);
         }
+    }
+
+    public class QueryResultMovieInfo : MovieInfo
+    {
+        public ImageSource MovieCoverImage { get; set; }
     }
 
     [Serializable]
