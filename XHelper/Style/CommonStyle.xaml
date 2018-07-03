@@ -24,6 +24,10 @@
     <Geometry x:Key="RepeatButton">M3.5445026,0 L7.0890052,7.0890053 L3.0459049E-09,7.0890053 z</Geometry>
     <Geometry x:Key="ComboBoxArrow">M-0,6 L-0,8 8,8 8,-0 6,-0 6,6 z</Geometry>
     <Geometry x:Key="ExpanderToggleButtonArrow">M5,-0 L9,5 1,5 z</Geometry>
+    <Geometry x:Key="IconCancelSmall">M511.581091 0C229.050182 0 0 229.050182 0 511.581091
+        c0 282.530909 229.050182 511.627636 511.581091 511.627636 282.530909 0 511.627636-229.050182 511.627636-511.627636C1023.208727 229.050182 794.158545 0 511.534545 0z 
+        m282.205091 663.552l-130.234182 130.234182-151.970909-151.970909-151.924364 151.970909-130.234182-130.234182 151.924364-151.970909
+        L229.469091 359.656727l130.234182-130.234182 151.924363 151.924364 151.970909-151.924364 130.234182 130.234182-151.970909 151.924364 151.970909 151.970909z</Geometry>
     <Geometry x:Key="IconDropDown1">M697.0368 568.2176c8.2944 0 14.848 6.5536 14.848 14.848v216.7808l79.872-79.872
         c2.7648-2.8672 6.656-4.5056 10.752-4.5056 3.8912 0 7.4752 1.4336 10.1376 3.9936 5.8368 5.5296 6.0416 15.1552 0.512 20.8896
         L707.072 846.5408l-0.1024 0.1024c-2.4576 2.7648-5.9392 4.1984-9.8304 4.1984-3.9936 0-7.68-1.536-10.5472-4.4032
@@ -362,7 +366,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
     <SolidColorBrush x:Key="ItemSelectedForeground" Color="#FF12DB96"/>
     <SolidColorBrush x:Key="ItemMouseOverForeground" Color="#FF12DB96"/>
 
-    <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource baseStyle}">
+    <Style x:Key="SimpleListBox" TargetType="{x:Type ListBox}" BasedOn="{StaticResource baseStyle}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="#505050" />
         <Setter Property="Effect">
@@ -566,6 +570,59 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                             </Border.Effect>
                         </Border>
                         <Border x:Name="BREdge" Grid.Row="3" Grid.Column="2" BorderThickness="0,0,1,1" BorderBrush="{TemplateBinding BorderBrush}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+                            </Border.Effect>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="GroupBox" x:Key="SimpleGroupStyle"  BasedOn="{StaticResource baseStyle}">
+        <Setter Property="BorderBrush" Value="{StaticResource GroupBoxBorderLightBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Grid SnapsToDevicePixels="true">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="50" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="50" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="50" />
+                        </Grid.ColumnDefinitions>
+                        <ContentPresenter Name="Presenter" 
+                                          Grid.Row="0"
+                                          Grid.Column="0" Grid.ColumnSpan="3" 
+                                          ContentSource="Header" RecognizesAccessKey="true" 
+                                          TextElement.Foreground="{TemplateBinding Foreground}"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5">
+                            <ContentPresenter.Effect>
+                                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+                            </ContentPresenter.Effect>
+                        </ContentPresenter>
+                        <ContentPresenter Name="ContentSite" 
+                                          Grid.Row="1" Grid.RowSpan="3"
+                                          Grid.Column="0" Grid.ColumnSpan="3" 
+                                          Margin="{TemplateBinding Padding}" 
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        <Border x:Name="TLEdge" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" BorderThickness="0,1,0,0" BorderBrush="{TemplateBinding BorderBrush}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+                            </Border.Effect>
+                        </Border>
+                        <Border x:Name="BREdge" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderThickness="0,0,0,1" BorderBrush="{TemplateBinding BorderBrush}">
                             <Border.Effect>
                                 <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
                             </Border.Effect>
@@ -829,6 +886,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
         <Setter Property="FontFamily" Value="Consolas" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
@@ -842,10 +900,10 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="G1" Grid.Column="0" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="{TemplateBinding Foreground}" CornerRadius="3,0,0,3" Padding="3,1">
+                        <Border x:Name="G1" Grid.Column="0" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="{TemplateBinding Foreground}" Height="20" CornerRadius="3,0,0,3" Padding="3,1">
                             <TextBlock Name="TagPart" Text="{TemplateBinding Tag}" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" />
                         </Border>
-                        <Border x:Name="G2" Grid.Column="1" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="Transparent" CornerRadius="0,3,3,0" Padding="5,1">
+                        <Border x:Name="G2" Grid.Column="1" BorderBrush="{TemplateBinding Foreground}" BorderThickness="1" Background="Transparent" Height="20" CornerRadius="0,3,3,0" Padding="5,1">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
                                               RecognizesAccessKey="True" />
@@ -855,6 +913,40 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="BorderBrush" Value="#d0d0d0"/>
                             <Setter Property="Foreground" Value="#d0d0d0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+    <Style x:Key="TagStyleLable" TargetType="{x:Type Label}" BasedOn="{StaticResource baseStyle}">
+        <Setter Property="Foreground" Value="#FF808080" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Label}">
+                    <Grid SnapsToDevicePixels="true" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="G2" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="{TemplateBinding Foreground}" 
+                                BorderThickness="1" Background="Transparent" Height="20" CornerRadius="3" Padding="5,1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"  Value="true">
+                            <Setter Property="Foreground" Value="LightCoral"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1344,6 +1436,7 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
     <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource baseStyle}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Foreground" Value="{StaticResource GroupBoxBorderLightBrush}" />
         <Setter Property="FocusVisualStyle" Value="{DynamicResource AFocusVisualStyte}" />
         <Setter Property="Effect">
@@ -1361,8 +1454,9 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="5" />
                                 </Grid.RowDefinitions>
+                                <Border Grid.RowSpan="2" BorderThickness="0" Background="White" Opacity="0" />
                                 <ContentPresenter Name="BulletText" Grid.Row="0" Margin="5" VerticalAlignment="Bottom"  HorizontalAlignment="Center"  
-                                                  TextElement.FontSize="13" RecognizesAccessKey="True" />
+                                                  TextElement.FontSize="13" TextElement.FontWeight="Bold" RecognizesAccessKey="True" />
                                 <Border Name="PLLine" Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{StaticResource GroupBoxBorderLightBrush}" Padding="0,1,0,0">
                                     <Rectangle Grid.Row="1" Name="CheckMark" StrokeThickness="0" Fill="#3babe3" />
                                 </Border>
@@ -1552,6 +1646,43 @@ C216.192 976.733091 212.817455 977.454545 209.454545 977.454545z</Geometry>
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="TagStyleButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="#FF808080" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="DarkGray" ShadowDepth="1" BlurRadius="10" Opacity="0.5" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid SnapsToDevicePixels="true" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="G2" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="{TemplateBinding Foreground}" 
+                                BorderThickness="1" Background="Transparent" Height="20" CornerRadius="3" Padding="5,1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Content="{TemplateBinding Content}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"  Value="true">
+                            <Setter Property="Foreground" Value="LightCoral"/>
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
 
     <!--#endregion-->
 

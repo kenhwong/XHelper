@@ -11,17 +11,28 @@ namespace XHelper
     [Serializable]
     public class StarInfo : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        private Guid _uniqueID;
+        private string _jName;
+        private int _rate;
+        private List<string> _storedMovieIDs;
+        private string _nameStored;
+        private string _avatorFileName;
+        private Uri _avatorWebUri;
+        private string _officialWeb;
+        private DirectoryInfo _dirStored;
 
-        public Guid UniqueID { get; set; }
-        public string JName { get; set; }
-        public int Rate { get; set; }
-        public List<string> StoredMovieIDs { get; set; }
-        public string NameStored { get; set; }
-        public string AvatorFileName { get; set; }
-        public Uri AvatorWebUri { get; set; }
-        public string OfficialWeb { get; set; }
-        public DirectoryInfo DirStored { get; set; }
+        public Guid UniqueID { get { return _uniqueID; } set { _uniqueID = value; OnPropertyChanged(nameof(UniqueID)); } }
+        public string JName { get { return _jName; } set { _jName = value; OnPropertyChanged(nameof(JName)); } }
+        public int Rate { get { return _rate; } set { _rate = value; OnPropertyChanged(nameof(Rate)); } }
+        public List<string> StoredMovieIDs { get { return _storedMovieIDs; } set { _storedMovieIDs = value; OnPropertyChanged(nameof(StoredMovieIDs)); } }
+        public string NameStored { get { return _nameStored; } set { _nameStored = value; OnPropertyChanged(nameof(NameStored)); } }
+        public string AvatorFileName { get { return _avatorFileName; } set { _avatorFileName = value; OnPropertyChanged(nameof(AvatorFileName)); } }
+        public Uri AvatorWebUri { get { return _avatorWebUri; } set { _avatorWebUri = value; OnPropertyChanged(nameof(AvatorWebUri)); } }
+        public string OfficialWeb { get { return _officialWeb; } set { _officialWeb = value; OnPropertyChanged(nameof(OfficialWeb)); } }
+        public DirectoryInfo DirStored { get { return _dirStored; } set { _dirStored = value; OnPropertyChanged(nameof(DirStored)); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public override string ToString() => JName;
 

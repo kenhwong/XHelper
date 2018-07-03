@@ -12,6 +12,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace XHelper
@@ -298,6 +302,8 @@ namespace XHelper
 
         public static string UrlCheck(string url)
         {
+            if (url.StartsWith("./"))
+                return url.Insert(0, "http:");
             if (url.StartsWith("//"))
                 return url.Insert(0, "http:");
             else
@@ -362,44 +368,47 @@ namespace XHelper
         /// <param name="uripage">web address uri</param>
         /// <param name="referrer">web request header referrer</param>
         /// <returns></returns>
-        public static async Task<string> Func_Net_ReadWebData(Uri uripage, Uri referrer)
+        public static async Task<(string response, HttpRequestMessage requestmessage)> Func_Net_ReadWebData(Uri uripage, Uri referrer)
         {
+            HttpRequestMessage reqmsg = null;
             try
             {
+                XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Add("over18","18");
                 XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Referrer = referrer;
                 var resp = await XGlobal.CurrentContext.HttpClient.GetAsync(uripage, XGlobal.CurrentContext.HttpCTS.Token);
+                reqmsg = resp.RequestMessage;
 
                 if (resp.StatusCode == HttpStatusCode.OK)
                 {
                     resp.EnsureSuccessStatusCode();
-                    return await resp.Content.ReadAsStringAsync();
+                    return (await resp.Content.ReadAsStringAsync(), reqmsg);
                 }
-                else return resp.StatusCode.ToString();
+                else return (resp.StatusCode.ToString(), reqmsg);
                 //}
             }
             catch (HttpRequestException hre)
             {
-                return hre.ToString();
+                return (hre.ToString(), reqmsg);
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                return (ex.ToString(), reqmsg);
             }
 
         }
 
-        public static async Task<string> Func_Net_ReadWebData(string urlpage, Uri referrer)
+        public static async Task<(string response, HttpRequestMessage requestmessage)> Func_Net_ReadWebData(string urlpage, Uri referrer)
         {
             UrlCheck(ref urlpage);
             return await Func_Net_ReadWebData(new Uri(urlpage), referrer);
         }
 
-        public static async Task<string> Func_Net_ReadWebData(Uri uripage)
+        public static async Task<(string response, HttpRequestMessage requestmessage)> Func_Net_ReadWebData(Uri uripage)
         {
             return await Func_Net_ReadWebData(uripage, uripage);
         }
 
-        public static async Task<string> Func_Net_ReadWebData(string urlpage)
+        public static async Task<(string response, HttpRequestMessage requestmessage)> Func_Net_ReadWebData(string urlpage)
         {
             UrlCheck(ref urlpage);
             return await Func_Net_ReadWebData(new Uri(urlpage));
@@ -413,6 +422,7 @@ namespace XHelper
         /// <returns></returns>
         public static async Task<Stream> Func_Net_ReadWebStream(Uri uriimage, Uri referrer)
         {
+            XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Add("over18", "18");
             XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Referrer = referrer;
             var resp = await XGlobal.CurrentContext.HttpClient.GetAsync(uriimage, XGlobal.CurrentContext.HttpCTS.Token);
 
@@ -477,4 +487,5 @@ namespace XHelper
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
 }

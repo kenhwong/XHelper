@@ -155,6 +155,7 @@ namespace XHelper
         }
     }
 
+
     public class BoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -202,6 +203,20 @@ namespace XHelper
         }
     }
 
+    public class ImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return null;
+            else return new BitmapImage(new Uri(value.ToString()));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     public class TrimmedTextConverter : IValueConverter
     {
 
@@ -209,7 +224,7 @@ namespace XHelper
         {
             string otext = value as string;
             int len = int.Parse(parameter as string);
-            return otext.Substring(0, len);
+            return otext.Length > len ? otext.Substring(0, len) : otext;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

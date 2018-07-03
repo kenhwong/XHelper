@@ -14,6 +14,7 @@
             <local:MachineSizeConverter x:Key="MSizeConverter" />
             <local:VarToBoolConverter x:Key="V2BConverter" />
             <local:TrimmedTextConverter x:Key="TrimStringConverter" />
+            <local:ImageConverter x:Key="ImageConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style/CommonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -130,7 +131,8 @@
                 <Label Content="Data Seek" FontSize="36" FontFamily="Arial" Style="{StaticResource IconLabel}" Tag="{StaticResource IconSearchR}" Foreground="#3F405040" Margin="0,-20,0,0" Height="40" DockPanel.Dock="Right" />
             </DockPanel>
         </StackPanel>
-        <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Margin="10,0,0,0" Background="{StaticResource PanelBackgroundBrush}" DataContext="{Binding ElementName=XUI, Path=NewMovieInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Margin="10,0,0,0" Background="{StaticResource PanelBackgroundBrush}" 
+              DataContext="{Binding ElementName=XUI, Path=NewMovieInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <Grid.Effect>
                 <DropShadowEffect Color="#FF808080" ShadowDepth="0" BlurRadius="10" Opacity="0.5" />
             </Grid.Effect>
@@ -140,19 +142,16 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-                <Label Style="{DynamicResource TagLable}" Tag="ADD" Content="New Movie" />
-            </StackPanel>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
-                <TextBox x:Name="txtNMFullFileName" Width="420" />
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,5">
+                <Label Style="{DynamicResource TagLableSmall}" Tag="add" Content="movie" />
+                <TextBox x:Name="txtNMFullFileName" Width="320" />
                 <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconBrowse}" 
                         x:Name="bnNMBrowse" ToolTip="Browse new movie file..." 
                         Width="20" Height="20" Margin="10,5,10,0" />
             </StackPanel>
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,0">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,0">
                 <Label Style="{DynamicResource TagLableSmall}" Tag="fmt" Content="{Binding Path=VFormat, TargetNullValue=Unknown}" Foreground="Green" />
                 <Label Style="{DynamicResource TagLableSmall}" Tag="res" Foreground="Green">
                     <Label.Content>
@@ -184,8 +183,8 @@
                 <Label Style="{DynamicResource TagLableSmall}" Tag="nreff"  Foreground="Green"
                            Content="{Binding Path=NRefFrame, Converter={StaticResource NRefFConverter}, TargetNullValue=--}" />
             </StackPanel>
-            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10">
-                <Label Content="KEY:" Target="{Binding ElementName=txtNMKeyword}" />
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,5">
+                <Label Style="{DynamicResource TagLableSmall}" Tag="set" Content="key" Target="{Binding ElementName=txtNMKeyword}" />
                 <ComboBox x:Name="txtNMKeyword" Width="150" IsEditable="True" IsReadOnly="False" />
                 <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearchR}" x:Name="bnNMQuery" ToolTip="Search movie from javbus..." Width="20" Height="20" Margin="10,0" />
                 <WrapPanel x:Name="subbuttongroup_SelectPanels" DockPanel.Dock="Top" Margin="0" Orientation="Horizontal" Visibility="Visible">
@@ -200,24 +199,106 @@
                     <Label Content="{Binding Path=NewMovieQuerySite.QName}" ContentStringFormat="Name: {0}" Foreground="Green" />
                 </WrapPanel>
             </StackPanel>
-            <StackPanel Grid.Row="4" Margin="10">
-                <GroupBox x:Name="gbNMQueryResult" Margin="0,5,10,5" Style="{DynamicResource ListGroupStyle}" Header="Query Result" Padding="10" Foreground="{StaticResource CyanBrush}">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"  Margin="0">
-                        <ListBox x:Name="lbNMQueryResult" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=NewMovieQueryResult}" IsSynchronizedWithCurrentItem="False">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" />
-                                        <Label Padding="5,0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />
-                                        <Label Padding="5,0" Content="{Binding Path=ReleaseID}" />
-                                        <Label Padding="5,0" Content="{Binding Path=ReleaseDate}" ContentStringFormat="{}{0:MM-dd-yyyy}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </ScrollViewer>
+            <StackPanel Grid.Row="3" Margin="10,5">
+                <GroupBox x:Name="gbNMQueryResult" Margin="0,5,10,5" Style="{DynamicResource SimpleGroupStyle}" Padding="10" Foreground="{StaticResource CyanBrush}">
+                    <ListBox x:Name="lbNMQueryResult" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=NewMovieQueryResult}" IsSynchronizedWithCurrentItem="False">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                        <Hyperlink Command="{Binding  ElementName=XUI, Path=CommandNMQueryResultItemSolve}" CommandParameter="{Binding Path=OfficialWeb.OriginalString}" TextDecorations="{x:Null}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" Margin="0,0,0,8" />
+                                                <Label Margin="0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />
+                                                <WrapPanel Margin="0">
+                                                    <Label Content="{Binding Path=ReleaseID}" FontWeight="Bold" />
+                                                    <Label Content="{Binding Path=ReleaseDate}" ContentStringFormat="/0:MM-dd-yyyy" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </GroupBox>
             </StackPanel>
+            <StackPanel Grid.Row="4" Margin="10">
+                <GroupBox x:Name="gbNMInformation" Margin="0,5,10,5" Style="{DynamicResource SimpleGroupStyle}" Padding="10" Foreground="{StaticResource CyanBrush}"
+                          Header="{Binding Path=ReleaseName, TargetNullValue=Unknown}">
+                    <Grid Margin="10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Style="{DynamicResource TagLableSmall}" Tag="info" Content="id" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <Label Grid.Column="1" Grid.Row="0" Style="{DynamicResource TagStyleLable}" Content="{Binding Path=ReleaseID, TargetNullValue=Unknown}" HorizontalAlignment="Left" />
+                        <Label Grid.Column="0" Grid.Row="1" Style="{DynamicResource TagLableSmall}" Tag="info" Content="date" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=ReleaseDate, StringFormat={}{0:MM-dd-yyyy}}" Foreground="LightCoral" Width="300" HorizontalAlignment="Left" />
+                        <Label Grid.Column="0" Grid.Row="2" Style="{DynamicResource TagLableSmall}" Tag="info" Content="make" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <Label Grid.Column="1" Grid.Row="2" Style="{DynamicResource TagStyleLable}" Content="{Binding Path=ReleaseStudio, TargetNullValue=Unknown}" HorizontalAlignment="Left" />
+                        <Label Grid.Column="0" Grid.Row="3" Style="{DynamicResource TagLableSmall}" Tag="info" Content="label" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <Label Grid.Column="1" Grid.Row="3" Style="{DynamicResource TagStyleLable}" Content="{Binding Path=ReleaseLabel, TargetNullValue=Unknown}" HorizontalAlignment="Left" />
+                        <Label Grid.Column="0" Grid.Row="4" Style="{DynamicResource TagLableSmall}" Tag="info" Content="genre" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <ItemsControl Grid.Column="1" Grid.Row="4" BorderThickness="0" ItemsSource="{Binding Path=Genre}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Style="{DynamicResource TagStyleLable}" Content="{Binding}" HorizontalAlignment="Left" Margin="0" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Margin="0" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                        <Label Grid.Column="0" Grid.Row="5" Style="{DynamicResource TagLableSmall}" Tag="info" Content="cast" Foreground="LightCoral" HorizontalAlignment="Left" />
+                        <ItemsControl Grid.Column="1" Grid.Row="5" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=NewMovieStars}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{DynamicResource TagStyleButton}" Content="{Binding Path=JName}" HorizontalAlignment="Left" Margin="0"
+                                             Command="{Binding ElementName=XUI, Path=CommandNMRecordSolve}" CommandParameter="{Binding Path=JName}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Margin="0" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
+            <StackPanel Grid.Row="5" Margin="10">
+                <GroupBox x:Name="gbNMCover" Margin="0,5,10,5" Style="{DynamicResource SimpleGroupStyle}" Padding="10" Foreground="{StaticResource CyanBrush}"
+                          Header="{Binding Path=ReleaseName, TargetNullValue=Unknown}">
+                    <Grid Margin="10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Source="{Binding CoverWebUrl, Converter={StaticResource ImageConverter}, TargetNullValue={x:Null}}"  Stretch="UniformToFill" Margin="0"/>
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="6" Margin="10"></StackPanel>
         </Grid>
     </Grid>
 

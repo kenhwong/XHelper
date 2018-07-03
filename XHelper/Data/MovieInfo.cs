@@ -7,6 +7,7 @@ using System.Linq;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace XHelper
 {
@@ -14,28 +15,52 @@ namespace XHelper
     public class MovieInfo : INotifyPropertyChanged
 
     {
+        private string _releaseID;
+        private string _releaseName;
+        private DateTime _releaseDate;
+        private int _releaseLength;
+        private string _releaseStudio;
+        private string _releaseLabel;
+        private ObservableCollection<string> _genre = new ObservableCollection<string>();
+        private int _vWidth;
+        private int _vHeight;
+        private int _nRefFrame;
+        private string _vFormat;
+        private TimeSpan _mediaFilesTotalLength;
+        private long _mediaFilesTotalSize;
+        private List<MediaFileInfo> _mediaFiles;
+        private string _mediaFilesDecodeDesc;
+        private List<Guid> _actorUIDs;
+        private DirectoryInfo _sourcePath;
+        private string _sourceMediaFileExt;
+        private string _coverFileName;
+        private string _coverWebUrl;
+        private Uri _officialWeb;
+
+        public string ReleaseID { get { return _releaseID; } set { _releaseID = value; OnPropertyChanged(nameof(ReleaseID)); } }
+        public string ReleaseName { get { return _releaseName; } set { _releaseName = value; OnPropertyChanged(nameof(ReleaseName)); } }
+        public DateTime ReleaseDate { get { return _releaseDate; } set { _releaseDate = value; OnPropertyChanged(nameof(ReleaseDate)); } }
+        public int ReleaseLength { get { return _releaseLength; } set { _releaseLength = value; OnPropertyChanged(nameof(ReleaseLength)); } }
+        public string ReleaseStudio { get { return _releaseStudio; } set { _releaseStudio = value; OnPropertyChanged(nameof(ReleaseStudio)); } }
+        public string ReleaseLabel { get { return _releaseLabel; } set { _releaseLabel = value; OnPropertyChanged(nameof(ReleaseLabel)); } }
+        public ObservableCollection<string> Genre { get { return _genre; } set { _genre = value; OnPropertyChanged(nameof(Genre)); } }
+        public int VWidth { get { return _vWidth; } set { _vWidth = value; OnPropertyChanged(nameof(VWidth)); } }
+        public int VHeight { get { return _vHeight; } set { _vHeight = value; OnPropertyChanged(nameof(VHeight)); } }
+        public int NRefFrame { get { return _nRefFrame; } set { _nRefFrame = value; OnPropertyChanged(nameof(NRefFrame)); } }
+        public string VFormat { get { return _vFormat; } set { _vFormat = value; OnPropertyChanged(nameof(VFormat)); } }
+        public TimeSpan MediaFilesTotalLength { get { return _mediaFilesTotalLength; } set { _mediaFilesTotalLength = value; OnPropertyChanged(nameof(MediaFilesTotalLength)); } }
+        public long MediaFilesTotalSize { get { return _mediaFilesTotalSize; } set { _mediaFilesTotalSize = value; OnPropertyChanged(nameof(MediaFilesTotalSize)); } }
+        public List<MediaFileInfo> MediaFiles { get { return _mediaFiles; } set { _mediaFiles = value; OnPropertyChanged(nameof(MediaFiles)); } }
+        public string MediaFilesDecodeDesc { get { return _mediaFilesDecodeDesc; } set { _mediaFilesDecodeDesc = value; OnPropertyChanged(nameof(MediaFilesDecodeDesc)); } }
+        public List<Guid> ActorUIDs { get { return _actorUIDs; } set { _actorUIDs = value; OnPropertyChanged(nameof(ActorUIDs)); } }
+        public DirectoryInfo SourcePath { get { return _sourcePath; } set { _sourcePath = value; OnPropertyChanged(nameof(SourcePath)); } }
+        public string SourceMediaFileExt { get { return _sourceMediaFileExt; } set { _sourceMediaFileExt = value; OnPropertyChanged(nameof(SourceMediaFileExt)); } }
+        public string CoverFileName { get { return _coverFileName; } set { _coverFileName = value; OnPropertyChanged(nameof(CoverFileName)); } }
+        public string CoverWebUrl { get { return _coverWebUrl; } set { _coverWebUrl = value; OnPropertyChanged(nameof(CoverWebUrl)); } }
+        public Uri OfficialWeb { get { return _officialWeb; } set { _officialWeb = value; OnPropertyChanged(nameof(OfficialWeb)); } }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public string ReleaseID { get; set; }
-        public string ReleaseName { get; set; }
-        public DateTime ReleaseDate { get; set; }
-        public string ReleaseStudio { get; set; }
-        public string ReleaseLabel { get; set; }
-        public List<string> Genre { get; set; }
-        public int VWidth { get; set; }
-        public int VHeight { get; set; }
-        public int NRefFrame { get; set; }
-        public string VFormat { get; set; }
-        public TimeSpan MediaFilesTotalLength { get; set; }
-        public long MediaFilesTotalSize { get; set; }
-        public List<MediaFileInfo> MediaFiles { get; set; }
-        public string MediaFilesDecodeDesc { get; set; }
-        public List<Guid> ActorUIDs { get; set; }
-        public DirectoryInfo SourcePath { get; set; }
-        public string SourceMediaFileExt { get; set; }
-        public string CoverFileName { get; set; }
-        public Uri OfficialWeb { get; set; }
 
         public override string ToString()
         {
