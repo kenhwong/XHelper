@@ -293,7 +293,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Image Grid.Row="0" Source="{Binding CoverWebUrl, Converter={StaticResource ImageConverter}, TargetNullValue={x:Null}}"  Stretch="UniformToFill" Margin="0"/>
+                        <Image x:Name="picCover" Grid.Row="0" Source="{Binding CoverWebUrl, Converter={StaticResource ImageConverter}, TargetNullValue={x:Null}}"  Stretch="UniformToFill" Margin="0"/>
                     </Grid>
                 </GroupBox>
             </StackPanel>

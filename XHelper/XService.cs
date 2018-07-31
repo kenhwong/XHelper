@@ -17,6 +17,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace XHelper
 {
@@ -373,7 +375,7 @@ namespace XHelper
             HttpRequestMessage reqmsg = null;
             try
             {
-                XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Add("over18","18");
+                XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Add("over18", "18");
                 XGlobal.CurrentContext.HttpClient.DefaultRequestHeaders.Referrer = referrer;
                 var resp = await XGlobal.CurrentContext.HttpClient.GetAsync(uripage, XGlobal.CurrentContext.HttpCTS.Token);
                 reqmsg = resp.RequestMessage;
@@ -447,7 +449,247 @@ namespace XHelper
 
         #endregion
 
+        #region XML Serialize Ex
+        public static class XMLDeserializerHelper
+        {
+            /// <summary>
+            /// Deserialization XML document
+            /// </summary>
+            /// <typeparam name="T">>The class type which need to deserializate</typeparam>
+            /// <param name="xmlPath">XML path</param>
+            /// <returns>Deserialized class object</returns>
+            public static T Deserialization<T>(string xmlPath)
+            {
+                //check file is exists in case
+                if (File.Exists(xmlPath))
+                {
+                    //read file to memory
+                    StreamReader stream = new StreamReader(xmlPath);
+                    XmlTextReader xreader = new XmlTextReader(stream) { Namespaces = false };
+                    //declare a serializer
+                    XmlSerializer serializer = new XmlSerializer(typeof(T));
+                    try
+                    {
+                        //Do deserialize 
+                        //return (T)serializer.Deserialize(stream);
+                        return (T)serializer.Deserialize(xreader);
+                    }
+                    //if some error occured,throw it
+                    catch (InvalidOperationException error)
+                    {
+                        throw error;
+                    }
+                    //finally close all resourece
+                    finally
+                    {
+                        //close the reader stream
+                        stream.Close();
+                        //release the stream resource
+                        stream.Dispose();
+                    }
+                }
+                //File not exists
+                else
+                {
+                    //throw data error exception
+                    throw new InvalidDataException("Can not open xml file,please check is file exists.");
+                }
+            }
 
+            /// <summary>
+            /// Serializate class object to xml document
+            /// </summary>
+            /// <typeparam name="T">The class type which need to serializate</typeparam>
+            /// <param name="obj">The class object which need to serializate</param>
+            /// <param name="outPutFilePath">The xml path where need to save the result</param>
+            /// <returns>run result</returns>
+            public static bool Serialization<T>(T obj, string outPutFilePath)
+            {
+                //Declare a boolean value to mark the run result
+                bool result = true;
+                //Declare a xml writer
+                XmlWriter writer = null;
+                XmlSerializerNamespaces nameSpace;
+                MemoryStream ms = new MemoryStream();
+                try
+                {
+
+                    //create a stream which write data to xml document.
+                    writer = XmlWriter.Create(outPutFilePath, new XmlWriterSettings
+                    {
+                        //set xml document style - auto create new line
+                        Indent = true,
+                        //set xml has no declaration
+                        //OmitXmlDeclaration = true,
+                        DoNotEscapeUriAttributes = true,
+                        NamespaceHandling = NamespaceHandling.OmitDuplicates,
+                        Encoding = Encoding.UTF8
+                    });
+                    nameSpace = new XmlSerializerNamespaces();
+                    nameSpace.Add("", "");
+                }
+                //if some error occured,throw it
+                catch (ArgumentException error)
+                {
+                    result = false;
+                    throw error;
+                }
+                //declare a serializer.
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
+                try
+                {
+                    //Serializate the object
+                    serializer.Serialize(writer, obj, nameSpace);
+
+                }
+                //if some error occured,throw it
+                catch (InvalidOperationException error)
+                {
+                    result = false;
+                    throw error;
+                }
+                //At finally close all resource
+                finally
+                {
+                    //close xml stream
+                    writer.Close();
+                }
+                return result;
+            }
+
+            public static string SerializationWithoutNameSpaceAndDeclare<T>(T obj)
+            {
+                //Declare a boolean value to mark the run result
+                string result = string.Empty;
+                //Declare a xml writer
+                XmlWriter writer = null;
+                XmlSerializerNamespaces nameSpace;
+                MemoryStream ms = new MemoryStream();
+                try
+                {
+
+                    //create a stream which write data to xml document.
+                    writer = XmlWriter.Create(ms, new XmlWriterSettings
+                    {
+                        //set xml document style - auto create new line
+                        Indent = true,
+                        //set xml has no declaration
+                        OmitXmlDeclaration = true,
+                        DoNotEscapeUriAttributes = true,
+                        NamespaceHandling = NamespaceHandling.OmitDuplicates
+                    });
+                    nameSpace = new XmlSerializerNamespaces();
+                    nameSpace.Add("", "");
+                }
+                //if some error occured,throw it
+                catch (ArgumentException error)
+                {
+                    throw error;
+                }
+                //declare a serializer.
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
+                try
+                {
+                    //Serializate the object
+                    serializer.Serialize(writer, obj, nameSpace);
+                    return Encoding.UTF8.GetString(ms.GetBuffer());
+                }
+                //if some error occured,throw it
+                catch (InvalidOperationException error)
+                {
+                    throw error;
+                }
+                //At finally close all resource
+                finally
+                {
+                    //close xml stream
+                    writer.Close();
+
+                    ms.Close();
+                }
+            }
+
+            /// <summary>
+            /// Serializate class object to string
+            /// </summary>
+            /// <typeparam name="T">The class type which need to serializate</typeparam>
+            /// <param name="obj">The class object which need to serializate</param>
+            /// <param name="outPutFilePath">The xml path where need to save the result</param>
+            /// <returns>run result</returns>
+            public static string Serialization<T>(T obj)
+            {
+                //Declare a boolean value to mark the run result
+                string result = string.Empty;
+                //Declare a MemoryStream to save result
+                MemoryStream stream = null;
+                try
+                {
+                    //create a memorystream which write data to memory.
+                    stream = new MemoryStream();
+                }
+                //if some error occured,throw it
+                catch (ArgumentException error)
+                {
+                    throw error;
+                }
+                //declare a serializer.
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
+                try
+                {
+                    //Serializate the object
+                    serializer.Serialize(stream, obj);
+                    result = Encoding.UTF8.GetString(stream.ToArray());
+                }
+                //if some error occured,throw it
+                catch (InvalidOperationException error)
+                {
+                    throw error;
+                }
+                //At finally close all resource
+                finally
+                {
+                    //close xml stream
+                    stream.Close();
+                }
+                return result;
+            }
+        }
+        #endregion
+
+        #region AppConfig Ex
+        public static void UpdateAppConfig(string newKey, string newValue)
+        {
+            bool isModified = false;
+            Configuration config = ConfigurationManager.OpenExeConfiguration(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            foreach (string key in config.AppSettings.Settings.AllKeys)
+            {
+                if (key == newKey)
+                {
+                    isModified = true;
+                }
+            }
+
+            if (isModified) config.AppSettings.Settings.Remove(newKey);
+            config.AppSettings.Settings.Add(newKey, newValue);
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+
+        public static string GetAppConfig(string strKey)
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            foreach (string key in config.AppSettings.Settings.AllKeys)
+            {
+                if (key == strKey)
+                {
+                    return config.AppSettings.Settings[strKey].Value;
+                }
+            }
+            return null;
+        }
+
+        #endregion
     }
 
     public class XQuerySite : INotifyPropertyChanged

@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using AqlaSerializer;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -123,8 +124,31 @@ namespace XHelper
             CommandBinding cbNMRecordSolve = new CommandBinding(CommandNMRecordSolve,
                 (sender, e) =>
                 {
+                    var _st = NewMovieStars.FirstOrDefault(s => s.JName == e.Parameter as string);
+                    DirectoryInfo _dirsource = new DirectoryInfo(NewMovieInfo.SourcePath.FullName);
+                    _st.CreateLocalMovieDirectory(NewMovieInfo);
 
-                    MessageBox.Show(e.Parameter as string);
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create((BitmapSource)picCover.Source));
+                    using (FileStream stream = new FileStream(System.IO.Path.Combine(NewMovieInfo.SourcePath.FullName, NewMovieInfo.CoverFileName), FileMode.Create))
+                        encoder.Save(stream);
+
+                    NewMovieInfo.MediaFiles.ForEach(m => m.LocalFileInfo.MoveTo(System.IO.Path.Combine(NewMovieInfo.SourcePath.FullName, m.LocalFileInfo.Name)));
+
+                    //todo: 保存记录数据
+                    string mdatafile = ConfigurationManager.AppSettings["MovieDataFile"];
+                    if (File.Exists(mdatafile)) File.Delete(mdatafile);
+                    using (FileStream fs = new FileStream(mdatafile, FileMode.Create))
+                    {
+                        Serializer.Serialize(fs, XGlobal.CurrentContext.TotalMovies);
+                    }
+                    string sdatafile = ConfigurationManager.AppSettings["StarDataFile"];
+                    if (File.Exists(sdatafile)) File.Delete(sdatafile);
+                    using (FileStream fs = new FileStream(sdatafile, FileMode.Create))
+                    {
+                        Serializer.Serialize(fs, XGlobal.CurrentContext.TotalStars);
+                    }
+
                     e.Handled = true;
                 },
                 (sender, e) => { e.CanExecute = true; e.Handled = true; });
@@ -149,6 +173,7 @@ namespace XHelper
             var cvurl = hnode.SelectSingleNode("//img[@id='video_jacket_img']").Attributes["src"].Value;
             if (cvurl.StartsWith("//")) cvurl = $"http:{cvurl}"; ;
             NewMovieInfo.CoverWebUrl = cvurl;
+            NewMovieInfo.CoverFileName = new Uri(cvurl).Segments.Last();
 
             hnode = hnode.SelectSingleNode("//table[@id='video_jacket_info']");
             //Resolve movie data
@@ -402,7 +427,7 @@ namespace XHelper
                     star.CreateLocalStarDirectory(NewMovieInfo);
 
                     Stream temp = await XService.Func_Net_ReadWebStream(star.AvatorWebUri, NewMovieInfo.OfficialWeb);
-                    star.AvatorFileName = System.IO.Path.Combine(star.DirStored.FullName, star.AvatorWebUri.Segments[star.AvatorWebUri.Segments.Length - 1]);
+                    star.AvatorFileName = System.IO.Path.Combine(star.DirStored, star.AvatorWebUri.Segments[star.AvatorWebUri.Segments.Length - 1]);
 
                     using (FileStream sourceStream = new FileStream(star.AvatorFileName, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
                     {
