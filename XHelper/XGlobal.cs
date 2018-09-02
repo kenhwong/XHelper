@@ -36,15 +36,14 @@ namespace XHelper
                 Proxy = (CurrentContext.UseProxy) ? CurrentContext.SSProxy : null
             };
 
-            CurrentContext.HttpClient = new HttpClient(handler);
-            CurrentContext.HttpClient.MaxResponseContentBufferSize = 1024 * 1024;
+            CurrentContext.HttpClient = new HttpClient(handler) { MaxResponseContentBufferSize = 1024 * 1024 };
             CurrentContext.HttpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)");
             CurrentContext.HttpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3");
 
-            BinaryFormatter binf = new BinaryFormatter();
-            //Initialize CurrentContext
-            if (File.Exists(CurrentContext.DataFile))
-                using (FileStream fs = new FileStream(CurrentContext.DataFile, FileMode.Open)) CurrentContext = (XContext)binf.Deserialize(fs);
+            string mfile = ConfigurationManager.AppSettings["MovieDataFile"];
+            string sfile = ConfigurationManager.AppSettings["StarDataFile"];
+            if (File.Exists(mfile)) CurrentContext.TotalMovies = XService.XMLDeserializerHelper.Deserialization<List<MovieInfo>>(mfile);
+            if (File.Exists(sfile)) CurrentContext.TotalStars = XService.XMLDeserializerHelper.Deserialization<List<StarInfo>>(sfile);
         }
 
 

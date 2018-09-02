@@ -78,6 +78,19 @@ namespace XHelper
                 throw new DirectoryNotFoundException(String.Format("源目录{0}不存在，可能已被刪除！", sourcedi.FullName));
             }
         }
+        public static void DeleteMovies(string sourcedirectory, string ext)
+        {
+            if (Directory.Exists(sourcedirectory))
+            {
+                List<string> files = Directory.GetFiles(sourcedirectory, "*" + ext, SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(ext, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                files.ForEach(c => File.Delete(c));
+            }
+            else
+            {
+                throw new DirectoryNotFoundException(String.Format("源目录{0}不存在，可能已被刪除！", sourcedirectory));
+            }
+        }
+
 
         /// <summary>
         /// 移动文件夹中的所有文件夹与文件到另一个文件夹
@@ -220,14 +233,14 @@ namespace XHelper
                 cmd = string.Format("a {0} {1} -ep1 -o+ -inul -r -ibck",
                                     rarName,
                                     path);
-                startinfo = new ProcessStartInfo();
-                startinfo.FileName = rarexe;
-                startinfo.Arguments = cmd;                          //设置命令参数
-                startinfo.WindowStyle = ProcessWindowStyle.Hidden;  //隐藏 WinRAR 窗口
-
-                startinfo.WorkingDirectory = rarPath;
-                process = new Process();
-                process.StartInfo = startinfo;
+                startinfo = new ProcessStartInfo
+                {
+                    FileName = rarexe,
+                    Arguments = cmd,                          //设置命令参数
+                    WindowStyle = ProcessWindowStyle.Hidden,  //隐藏 WinRAR 窗口
+                    WorkingDirectory = rarPath
+                };
+                process = new Process { StartInfo = startinfo };
                 process.Start();
                 process.WaitForExit(); //无限期等待进程 winrar.exe 退出
                 if (process.HasExited)
@@ -271,14 +284,14 @@ namespace XHelper
                 cmd = string.Format("e {0} {1} -y",
                                     rarName,
                                     path);
-                startinfo = new ProcessStartInfo();
-                startinfo.FileName = rarexe;
-                startinfo.Arguments = cmd;
-                startinfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-                startinfo.WorkingDirectory = rarPath;
-                process = new Process();
-                process.StartInfo = startinfo;
+                startinfo = new ProcessStartInfo
+                {
+                    FileName = rarexe,
+                    Arguments = cmd,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    WorkingDirectory = rarPath
+                };
+                process = new Process { StartInfo = startinfo };
                 process.Start();
                 process.WaitForExit();
                 if (process.HasExited)
@@ -416,6 +429,12 @@ namespace XHelper
             return await Func_Net_ReadWebData(new Uri(urlpage));
         }
 
+        public static async Task<(string response, HttpRequestMessage requestmessage)> Func_Net_ReadWebData(string urlpage, string referrer)
+        {
+            UrlCheck(ref urlpage);
+            return await Func_Net_ReadWebData(new Uri(urlpage), new Uri(referrer));
+        }
+
         /// <summary>
         /// Get stream data from web
         /// </summary>
@@ -445,6 +464,20 @@ namespace XHelper
         {
             UrlCheck(ref urlimage);
             return await Func_Net_ReadWebStream(new Uri(urlimage), referrer);
+        }
+        public static async Task<Stream> Func_Net_ReadWebStream(Uri uriimage)
+        {
+            return await Func_Net_ReadWebStream(uriimage, uriimage);
+        }
+        public static async Task<Stream> Func_Net_ReadWebStream(string urlimage)
+        {
+            UrlCheck(ref urlimage);
+            return await Func_Net_ReadWebStream(new Uri(urlimage));
+        }
+        public static async Task<Stream> Func_Net_ReadWebStream(string urlimage, string referrer)
+        {
+            UrlCheck(ref urlimage);
+            return await Func_Net_ReadWebStream(new Uri(urlimage), new Uri(referrer));
         }
 
         #endregion

@@ -89,47 +89,75 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Margin="10">
-                <WrapPanel DockPanel.Dock="Top" Margin="0,10,0,0">
-                    <Label Content="当前处理：" />
-                    <Label x:Name="txtCurrentProcessElement" Style="{StaticResource CCyanLabel}" Content="无" />
-                    <Label Content="操作：" />
-                    <Label x:Name="txtCurrentProcessOperation" Style="{StaticResource CCyanLabel}" Content="无" />
-                </WrapPanel>
-                <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Left">
-                    <ProgressBar x:Name="progbarCurrentProcess" Width="500" Height="10" Value="0" OverridesDefaultStyle="true" RenderTransformOrigin="0,0" Margin="0" />
-                </StackPanel>
-                <WrapPanel DockPanel.Dock="Top" Margin="0,10,0,0">
-                    <Label Content="全局处理：" />
-                    <Label x:Name="txtGlobalProcessElement" Style="{StaticResource CCyanLabel}" Content="无" />
-                    <Label Content="操作：" />
-                    <Label x:Name="txtGlobalProcessOperation" Style="{StaticResource CCyanLabel}" Content="无" />
-                </WrapPanel>
-                <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Left">
-                    <ProgressBar x:Name="progbarGlobalProcess" Width="500" Height="10" Value="0" OverridesDefaultStyle="true" RenderTransformOrigin="0,0" Margin="0" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,5">
+                    <TextBox x:Name="txtSearchKeyword" Width="200" />
+                    <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearch}" x:Name="bnSearch" ToolTip="Search..." DockPanel.Dock="Left" Width="30" Height="30" Margin="20,0" />
+                    <CheckBox x:Name="chkSearchRangeAll" Content="All" IsChecked="True" IsThreeState="True" />
+                    <CheckBox x:Name="chkSearchRangeZone" Content="Movies" IsChecked="True" />
+                    <CheckBox x:Name="chkSearchRangeElement" Content="Stars" IsChecked="True" />
                 </StackPanel>
             </StackPanel>
-            <ListBox Grid.Column="1" x:Name="listInformation" MaxHeight="94" Margin="10" SelectionChanged="listInformation_SelectionChanged"
+            <ListBox Grid.Column="1" x:Name="listInformation" MaxHeight="94" Margin="10" SelectionChanged="ListInformation_SelectionChanged"
                              Style="{DynamicResource MonitorScreen}" ItemContainerStyle="{StaticResource MonitorScreenItem}" />
         </Grid>
-        <StackPanel Grid.Column="0" Grid.Row="2" Margin="-10,0,0,0" Background="{StaticResource PanelBackgroundBrush}" SnapsToDevicePixels="True">
-            <StackPanel.Effect>
-                <DropShadowEffect Color="#FF808080" ShadowDepth="0" BlurRadius="10" Opacity="0.5" />
-            </StackPanel.Effect>
-            <StackPanel Orientation="Horizontal" Margin="20,10,20,5">
-                <TextBox x:Name="txtSearchKeyword" Width="500" />
-                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearch}" x:Name="bnSearch" ToolTip="Search..." DockPanel.Dock="Left" Width="30" Height="30" Margin="20,0" />
-                <CheckBox x:Name="chkSearchRangeAll" Content="All" IsChecked="True" IsThreeState="True" />
-                <CheckBox x:Name="chkSearchRangeZone" Content="Movies" IsChecked="True" />
-                <CheckBox x:Name="chkSearchRangeElement" Content="Stars" IsChecked="True" />
+        <StackPanel Grid.Column="0" Grid.Row="2" Margin="0" SnapsToDevicePixels="True">
+            <StackPanel Grid.Row="3" Margin="10,5">
+                <GroupBox x:Name="gbStarList" Margin="0,5" Style="{DynamicResource SimpleGroupStyle}" Padding="10" Foreground="{StaticResource CyanBrush}">
+                    <ListBox x:Name="lbStarList" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=ListStars}" IsSynchronizedWithCurrentItem="False">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                        <Hyperlink Command="{Binding  ElementName=XUI, Path=CommandNMQueryResultItemSolve}" CommandParameter="{Binding Path=OfficialWeb}" TextDecorations="{x:Null}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" Margin="0,0,0,8" />
+                                                <Label Margin="0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />
+                                                <WrapPanel Margin="0">
+                                                    <Label Content="{Binding Path=ReleaseID}" FontWeight="Bold" />
+                                                    <Label Content="{Binding Path=ReleaseDate}" ContentStringFormat="/0:MM-dd-yyyy" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
             </StackPanel>
-            <DockPanel x:Name="spSearchResult" LastChildFill="False" Margin="20,5,20,10" Visibility="Visible">
-                <Label Content="搜索结果：" DockPanel.Dock="Left" />
-                <Label x:Name="txtResultZone" Style="{StaticResource CCyanLabel}"  DockPanel.Dock="Left" />
-                <Label x:Name="txtResultPanel" Style="{StaticResource CCyanLabel}" DockPanel.Dock="Left" />
-                <Label x:Name="txtResultElement" Style="{StaticResource CCyanLabel}" DockPanel.Dock="Left" />
-                <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconClear}" x:Name="bnCloseResult" ToolTip="关闭搜索结果" DockPanel.Dock="Left" Width="25" Height="15" Margin="0" />
-                <Label Content="Data Seek" FontSize="36" FontFamily="Arial" Style="{StaticResource IconLabel}" Tag="{StaticResource IconSearchR}" Foreground="#3F405040" Margin="0,-20,0,0" Height="40" DockPanel.Dock="Right" />
-            </DockPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="3" Margin="-10,0,0,0" SnapsToDevicePixels="True">
+            <StackPanel Margin="20,10,20,5">
+                <GroupBox x:Name="gbListStars" Margin="0" Style="{DynamicResource SimpleGroupStyle}" Padding="10">
+                    <ListBox x:Name="lbListStars" BorderThickness="0" ItemsSource="{Binding ElementName=XUI, Path=NewMovieQueryResult}" IsSynchronizedWithCurrentItem="False">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                        <Hyperlink Command="{Binding  ElementName=XUI, Path=CommandNMQueryResultItemSolve}" CommandParameter="{Binding Path=OfficialWeb}" TextDecorations="{x:Null}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" Margin="0,0,0,8" />
+                                                <Label Margin="0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />
+                                                <WrapPanel Margin="0">
+                                                    <Label Content="{Binding Path=ReleaseID}" FontWeight="Bold" />
+                                                    <Label Content="{Binding Path=ReleaseDate}" ContentStringFormat="/0:MM-dd-yyyy" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
+            </StackPanel>
+
         </StackPanel>
         <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Margin="10,0,0,0" Background="{StaticResource PanelBackgroundBrush}" 
               DataContext="{Binding ElementName=XUI, Path=NewMovieInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -188,13 +216,13 @@
                 <ComboBox x:Name="txtNMKeyword" Width="150" IsEditable="True" IsReadOnly="False" />
                 <Button Style="{DynamicResource IconPathButton}" Tag="{StaticResource IconSearchR}" x:Name="bnNMQuery" ToolTip="Search movie from javbus..." Width="20" Height="20" Margin="10,0" />
                 <WrapPanel x:Name="subbuttongroup_SelectPanels" DockPanel.Dock="Top" Margin="0" Orientation="Horizontal" Visibility="Visible">
-                    <RadioButton Content="B" GroupName="gQueryWeb" 
+                    <RadioButton Content="BUS" GroupName="gQueryWeb" 
                                  IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=BSite, Converter={StaticResource V2BConverter}}" />
-                    <RadioButton Content="L" GroupName="gQueryWeb" 
+                    <RadioButton Content="LIB" GroupName="gQueryWeb" 
                                  IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=LSite, Converter={StaticResource V2BConverter}}" />
-                    <RadioButton Content="C" GroupName="gQueryWeb" 
+                    <RadioButton Content="MOO" GroupName="gQueryWeb" 
                                  IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=CSite, Converter={StaticResource V2BConverter}}" />
-                    <RadioButton Content="U" GroupName="gQueryWeb" 
+                    <RadioButton Content="SOX" GroupName="gQueryWeb" 
                                  IsChecked="{Binding ElementName=XUI, Path=NewMovieQuerySite.QName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ConverterParameter=USite, Converter={StaticResource V2BConverter}}" />
                     <Label Content="{Binding Path=NewMovieQuerySite.QName}" ContentStringFormat="Name: {0}" Foreground="Green" />
                 </WrapPanel>
@@ -210,7 +238,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                        <Hyperlink Command="{Binding  ElementName=XUI, Path=CommandNMQueryResultItemSolve}" CommandParameter="{Binding Path=OfficialWeb.OriginalString}" TextDecorations="{x:Null}">
+                                        <Hyperlink Command="{Binding  ElementName=XUI, Path=CommandNMQueryResultItemSolve}" CommandParameter="{Binding Path=OfficialWeb}" TextDecorations="{x:Null}">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Image Width="147" Height="200" Source="{Binding Path=MovieCoverImage}" Margin="0,0,0,8" />
                                                 <Label Margin="0" Content="{Binding Path=ReleaseName, Converter={StaticResource TrimStringConverter}, ConverterParameter=15}" />

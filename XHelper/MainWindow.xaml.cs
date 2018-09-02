@@ -39,6 +39,12 @@ namespace XHelper
         private ObservableCollection<QueryResultMovieInfo> _newMovieQueryResult = new ObservableCollection<QueryResultMovieInfo>();
         public ObservableCollection<QueryResultMovieInfo> NewMovieQueryResult { get { return _newMovieQueryResult; } set { _newMovieQueryResult = value; OnPropertyChanged(nameof(NewMovieQueryResult)); } }
 
+        private ObservableCollection<StarInfo> _listStars = new ObservableCollection<StarInfo>();
+        public ObservableCollection<StarInfo> ListStars { get { return _listStars; } set { _listStars = value; OnPropertyChanged(nameof(ListStars)); } }
+        private ObservableCollection<MovieInfo> _listMovies = new ObservableCollection<MovieInfo>();
+        public ObservableCollection<MovieInfo> ListMovies { get { return _listMovies; } set { _listMovies = value; OnPropertyChanged(nameof(ListMovies)); } }
+
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -47,7 +53,8 @@ namespace XHelper
         {
             InitializeComponent();
             InitializeCommand();
-
+            XGlobal.CurrentContext.TotalStars.ForEach(s => ListStars.Add(s));
+            XGlobal.CurrentContext.TotalMovies.ForEach(m => ListMovies.Add(m));
             DataContext = this;
         }
 
@@ -65,8 +72,10 @@ namespace XHelper
                 {
                     NewMovieInfo = new MovieInfo();
 
-                    Microsoft.Win32.OpenFileDialog ofd_selectmovie = new Microsoft.Win32.OpenFileDialog();
-                    ofd_selectmovie.Filter = "Video files|*.avi;*.wmv;*.mp4;*.m4v;*.asf；*.asx;*.rm;*.rmvb;*.mpg;*.mpeg;*.mpe;*.3gp;*.mov;*.dat;*.mkv;*.flv;*.vob";
+                    Microsoft.Win32.OpenFileDialog ofd_selectmovie = new Microsoft.Win32.OpenFileDialog
+                    {
+                        Filter = "Video files|*.avi;*.wmv;*.mp4;*.m4v;*.asf；*.asx;*.rm;*.rmvb;*.mpg;*.mpeg;*.mpe;*.3gp;*.mov;*.dat;*.mkv;*.flv;*.vob"
+                    };
                     Nullable<bool> result = ofd_selectmovie.ShowDialog();
 
                     if (result.HasValue && result.Value)
@@ -125,29 +134,28 @@ namespace XHelper
                 (sender, e) =>
                 {
                     var _st = NewMovieStars.FirstOrDefault(s => s.JName == e.Parameter as string);
-                    DirectoryInfo _dirsource = new DirectoryInfo(NewMovieInfo.SourcePath.FullName);
+                    DirectoryInfo _dirsource = new DirectoryInfo(NewMovieInfo.SourcePath);
                     _st.CreateLocalMovieDirectory(NewMovieInfo);
+                    listInformation.SelectedIndex = listInformation.Items.Add($"MKDIR: {NewMovieInfo.SourcePath}...");
 
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create((BitmapSource)picCover.Source));
-                    using (FileStream stream = new FileStream(System.IO.Path.Combine(NewMovieInfo.SourcePath.FullName, NewMovieInfo.CoverFileName), FileMode.Create))
+                    using (FileStream stream = new FileStream(System.IO.Path.Combine(NewMovieInfo.SourcePath, NewMovieInfo.CoverFileName), FileMode.Create))
                         encoder.Save(stream);
+                    listInformation.SelectedIndex = listInformation.Items.Add($"SAVE COVER: {NewMovieInfo.CoverFileName}...");
 
-                    NewMovieInfo.MediaFiles.ForEach(m => m.LocalFileInfo.MoveTo(System.IO.Path.Combine(NewMovieInfo.SourcePath.FullName, m.LocalFileInfo.Name)));
+                    NewMovieInfo.MediaFiles.ForEach(m => File.Move(m.LocalFileName, System.IO.Path.Combine(NewMovieInfo.SourcePath, System.IO.Path.GetFileName(m.LocalFileName))));
+                    XGlobal.CurrentContext.TotalMovies.Add(NewMovieInfo);
+                    listInformation.SelectedIndex = listInformation.Items.Add($"MOVE VIDEO: {NewMovieInfo.MediaFiles.Count}...");
 
                     //todo: 保存记录数据
                     string mdatafile = ConfigurationManager.AppSettings["MovieDataFile"];
                     if (File.Exists(mdatafile)) File.Delete(mdatafile);
-                    using (FileStream fs = new FileStream(mdatafile, FileMode.Create))
-                    {
-                        Serializer.Serialize(fs, XGlobal.CurrentContext.TotalMovies);
-                    }
+                    XService.XMLDeserializerHelper.Serialization<List<MovieInfo>>(XGlobal.CurrentContext.TotalMovies, mdatafile);
+
                     string sdatafile = ConfigurationManager.AppSettings["StarDataFile"];
                     if (File.Exists(sdatafile)) File.Delete(sdatafile);
-                    using (FileStream fs = new FileStream(sdatafile, FileMode.Create))
-                    {
-                        Serializer.Serialize(fs, XGlobal.CurrentContext.TotalStars);
-                    }
+                    XService.XMLDeserializerHelper.Serialization<List<StarInfo>>(XGlobal.CurrentContext.TotalStars, sdatafile);
 
                     e.Handled = true;
                 },
@@ -163,10 +171,10 @@ namespace XHelper
         private async void Func_NMResolveLResult(string v)
         {
             listInformation.SelectedIndex = listInformation.Items.Add($"READ: {v}...");
-            NewMovieInfo.OfficialWeb = new Uri(v);
+            NewMovieInfo.OfficialWeb = v;
             var streamresult = (await XService.Func_Net_ReadWebData(NewMovieInfo.OfficialWeb)).response;
 
-            CurrentHtmlDocument.LoadHtml(streamresult.Replace(Environment.NewLine, " ").Replace("\t", " "));
+            CurrentHtmlDocument.LoadHtml(streamresult);
             HtmlNode hnode = CurrentHtmlDocument.DocumentNode.SelectSingleNode("//div[@id='rightcolumn']");
 
             NewMovieInfo.ReleaseName = hnode.SelectSingleNode("//div[@id='video_title']/h3[1]").InnerText;
@@ -191,16 +199,17 @@ namespace XHelper
             throw new NotImplementedException();
         }
 
+        #region Func_AnalysisMovie_Cover
         private async Task<bool> Func_AnalysisMovie_Cover(HtmlNode sourcenode)
         {
             NewMovieInfo.CoverWebUrl = XService.UrlCheck(sourcenode.SelectSingleNode("//a[@class='bigImage']/img").Attributes["src"].Value);
             Uri coveruri = new Uri(NewMovieInfo.CoverWebUrl);
-            NewMovieInfo.CoverFileName = System.IO.Path.Combine(NewMovieInfo.SourcePath.FullName, coveruri.Segments[coveruri.Segments.Length - 1]);
+            NewMovieInfo.CoverFileName = System.IO.Path.Combine(NewMovieInfo.SourcePath, coveruri.Segments[coveruri.Segments.Length - 1]);
 
             listInformation.SelectedIndex = listInformation.Items.Add($"創建影片封面 {NewMovieInfo.CoverFileName} ...");
             var coverimage = new ImageSourceConverter().ConvertFrom(coveruri);
-            
-            using (Stream temp = await XService.Func_Net_ReadWebStream(coveruri, NewMovieInfo.OfficialWeb))
+
+            using (Stream temp = await XService.Func_Net_ReadWebStream(coveruri, new Uri(NewMovieInfo.OfficialWeb)))
             {
                 if (temp != Stream.Null)
                 {
@@ -222,16 +231,18 @@ namespace XHelper
             return true;
         }
 
+        #endregion
 
         private void Func_NMResolveUCResult(string v)
         {
             throw new NotImplementedException();
         }
 
+        #region Func_NMResolveBResult
         private async void Func_NMResolveBResult(string v)
         {
             listInformation.SelectedIndex = listInformation.Items.Add($"READ: {v}...");
-            NewMovieInfo.OfficialWeb = new Uri(v);
+            NewMovieInfo.OfficialWeb = v;
             var streamresult = (await XService.Func_Net_ReadWebData(NewMovieInfo.OfficialWeb)).response;
 
             CurrentHtmlDocument.LoadHtml(streamresult.Replace(Environment.NewLine, " ").Replace("\t", " "));
@@ -300,13 +311,15 @@ namespace XHelper
             //if (!await Func_AnalysisMovie_Samples(hnode)) return;
         }
 
+        #endregion
+
         private void Func_NMAnalysisLMovie(HtmlNode sourcenode)
         {
             listInformation.SelectedIndex = listInformation.Items.Add($"READ: MOVIE INFORMATION");
 
             HtmlNode info_node = sourcenode.SelectSingleNode("//div[@id='video_info']");
             NewMovieInfo.ReleaseID = info_node.SelectSingleNode("//div[@id='video_id']//td[@class='text']").InnerText;
-            NewMovieInfo.ReleaseDate = DateTime.Parse(info_node.SelectSingleNode("//div[@id='video_date']//td[@class='text']").InnerText);
+            NewMovieInfo.ReleaseDateTicks = DateTime.Parse(info_node.SelectSingleNode("//div[@id='video_date']//td[@class='text']").InnerText).Ticks;
             HtmlNode nrl = info_node.SelectSingleNode("//div[@id='video_length']//td[@class='text']");
             if (nrl == null) nrl = info_node.SelectSingleNode("//div[@id='video_length']//span[@class='text']");
             NewMovieInfo.ReleaseLength = int.Parse(nrl.InnerText);
@@ -316,6 +329,7 @@ namespace XHelper
                 NewMovieInfo.Genre.Add(ng.InnerText.Replace("&nbsp;", "").Trim());
         }
 
+        #region Func_AnalysisMovie
         private void Func_AnalysisMovie(HtmlNode sourcenode)
         {
             listInformation.SelectedIndex = listInformation.Items.Add($"READ: {NewMovieInfo.ReleaseID}");
@@ -340,7 +354,7 @@ namespace XHelper
                 */
                 /* ja site */
                 if (_node.InnerText.Contains("品番")) NewMovieInfo.ReleaseID = _node.NextSibling.InnerText.Trim();
-                else if (_node.InnerText.Contains("発売日")) NewMovieInfo.ReleaseDate = DateTime.Parse(Regex.Replace(_node.ParentNode.InnerText, @"(.*?\:)", ""));
+                else if (_node.InnerText.Contains("発売日")) NewMovieInfo.ReleaseDateTicks = DateTime.Parse(Regex.Replace(_node.ParentNode.InnerText, @"(.*?\:)", "")).Ticks;
                 else if (_node.InnerText.Contains("収録時間")) NewMovieInfo.ReleaseLength = int.Parse(Regex.Match(_node.ParentNode.InnerText, @"(\d+)").Groups[1].Value);
                 else if (_node.InnerText.Contains("メーカー")) NewMovieInfo.ReleaseStudio = _node.NextSibling.InnerText.Trim();
                 else if (_node.InnerText.Contains("レーベル")) NewMovieInfo.ReleaseLabel = _node.NextSibling.InnerText.Trim();
@@ -352,6 +366,8 @@ namespace XHelper
 
             }
         }
+
+        #endregion
 
         private bool Func_NMAnalysisLStars(HtmlNode hnode)
         {
@@ -381,7 +397,7 @@ namespace XHelper
                 }
 
                 star.CreateLocalStarDirectory(NewMovieInfo);
-                listInformation.SelectedIndex = listInformation.Items.Add($"CREATE: DIR/{System.IO.Path.Combine(NewMovieInfo.SourcePath.Root.FullName, ConfigurationManager.AppSettings["ArchiveName"], star.JName)}");
+                listInformation.SelectedIndex = listInformation.Items.Add($"CREATE: DIR/{System.IO.Path.Combine(System.IO.Path.GetPathRoot(NewMovieInfo.SourcePath), ConfigurationManager.AppSettings["ArchiveName"], star.JName)}");
 
                 star.StoredMovieIDs.Add(NewMovieInfo.ReleaseID);
                 NewMovieStars.Add(star);
@@ -392,6 +408,7 @@ namespace XHelper
             return true;
         }
 
+        #region Func_AnalysisStars
         private async Task<bool> Func_AnalysisStars(HtmlNode sourcenode)
         {
             NewMovieStars.Clear();
@@ -422,12 +439,13 @@ namespace XHelper
                     //Read Avator to Stream                    
                     listInformation.SelectedIndex = listInformation.Items.Add($"CREATE: DIR/{star.JName}/TEMP");
 
-                    star.AvatorWebUri = new Uri(XService.UrlCheck(_node.SelectSingleNode(".//img").Attributes["src"].Value));
+                    star.AvatorWebUrl = XService.UrlCheck(_node.SelectSingleNode(".//img").Attributes["src"].Value);
                     //star.CreateStarDirectoryTemp();
                     star.CreateLocalStarDirectory(NewMovieInfo);
 
-                    Stream temp = await XService.Func_Net_ReadWebStream(star.AvatorWebUri, NewMovieInfo.OfficialWeb);
-                    star.AvatorFileName = System.IO.Path.Combine(star.DirStored, star.AvatorWebUri.Segments[star.AvatorWebUri.Segments.Length - 1]);
+                    Stream temp = await XService.Func_Net_ReadWebStream(star.AvatorWebUrl, NewMovieInfo.OfficialWeb);
+                    var au = new Uri(star.AvatorWebUrl);
+                    star.AvatorFileName = System.IO.Path.Combine(star.DirStored, au.Segments[au.Segments.Length - 1]);
 
                     using (FileStream sourceStream = new FileStream(star.AvatorFileName, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
                     {
@@ -446,6 +464,8 @@ namespace XHelper
             return true;
         }
 
+        #endregion
+
         private async void Func_NMLRecordAsync(string qName, string keyword)
         {
             //XGlobal.RebuildSubDirTemp();
@@ -453,9 +473,9 @@ namespace XHelper
             listInformation.SelectedIndex = listInformation.Items.Add($"QUERY: {NewMovieQuerySite.QUri.Host.ToUpper()} / KEY: {keyword}...");
 
             Uri uri_search = new Uri($"{NewMovieQuerySite.QUri}ja/vl_searchbyid.php?keyword={WebUtility.UrlEncode(keyword.Trim())}");
-            var webdata = await XService.Func_Net_ReadWebData(uri_search);
-            var streamresult = webdata.response;
-            var request = webdata.requestmessage;
+            var (response, requestmessage) = await XService.Func_Net_ReadWebData(uri_search);
+            var streamresult = response;
+            var request = requestmessage;
 
             if (streamresult.Contains("System.Net.Http.HttpRequestException:"))
             {
@@ -496,13 +516,15 @@ namespace XHelper
                 foreach (HtmlNode _node in node_results)
                 {
                     Stream tempimg = await XService.Func_Net_ReadWebStream(_node.SelectSingleNode(".//img").Attributes["src"].Value, uri_search);
-                    QueryResultMovieInfo mi = new QueryResultMovieInfo();
-                    mi.ReleaseID = _node.SelectSingleNode(".//div[@class='id']").InnerText.Trim();
-                    mi.ReleaseName = _node.SelectSingleNode(".//div[@class='title']").InnerText.Trim();
-                    mi.MovieCoverImage = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource;
+                    QueryResultMovieInfo mi = new QueryResultMovieInfo
+                    {
+                        ReleaseID = _node.SelectSingleNode(".//div[@class='id']").InnerText.Trim(),
+                        ReleaseName = _node.SelectSingleNode(".//div[@class='title']").InnerText.Trim(),
+                        MovieCoverImage = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource
+                    };
                     string reurl = _node.SelectSingleNode(".//a[1]").Attributes["href"].Value;
-                    if (reurl.StartsWith("./")) reurl = reurl.Replace("./", NewMovieQuerySite.QUri.ToString());
-                    mi.OfficialWeb = new Uri(reurl);
+                    if (reurl.StartsWith("./")) reurl = reurl.Replace("./", $"{NewMovieQuerySite.QUri}ja/");
+                    mi.OfficialWeb = reurl;
                     NewMovieQueryResult.Add(mi);
                 }//end foreach in node_results
                 #endregion
@@ -572,16 +594,18 @@ namespace XHelper
             foreach (HtmlNode _node in node_results)
             {
                 Stream tempimg = await XService.Func_Net_ReadWebStream(_node.SelectSingleNode(".//img").Attributes["src"].Value, uri_search);
-                QueryResultMovieInfo mi = new QueryResultMovieInfo();
-                mi.ReleaseID = _node.SelectSingleNode(".//date[1]").InnerText;
+                QueryResultMovieInfo mi = new QueryResultMovieInfo
+                {
+                    ReleaseID = _node.SelectSingleNode(".//date[1]").InnerText
+                };
                 _node.SelectSingleNode(".//span[1]/date[1]").Remove();
-                mi.ReleaseDate = Convert.ToDateTime(_node.SelectSingleNode(".//date[1]").InnerText);
+                mi.ReleaseDateTicks = Convert.ToDateTime(_node.SelectSingleNode(".//date[1]").InnerText).Ticks;
                 _node.SelectSingleNode(".//span[1]/date[1]").Remove();
                 _node.SelectSingleNode(".//span[1]/div[1]").Remove();
                 mi.ReleaseName = _node.SelectSingleNode(".//span[1]").InnerText.Trim(new char[] { ' ', '/' });
                 //gi.Glyph = new BitmapImage() { StreamSource = tempimg };
                 mi.MovieCoverImage = new ImageSourceConverter().ConvertFrom(tempimg) as ImageSource;
-                mi.OfficialWeb = new Uri(XService.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value));
+                mi.OfficialWeb = XService.UrlCheck(_node.SelectSingleNode(".//a[1]").Attributes["href"].Value);
                 NewMovieQueryResult.Add(mi);
             }
             #endregion
@@ -596,8 +620,7 @@ namespace XHelper
         /// <param name="_filename">New media file full name</param>
         private void Func_NMOpenMediaFile(string _filename)
         {
-            NewMovieInfo = new MovieInfo(_filename);
-            NewMovieInfo.SourceMediaFileExt = System.IO.Path.GetExtension(_filename);
+            NewMovieInfo = new MovieInfo(_filename) { SourceMediaFileExt = System.IO.Path.GetExtension(_filename) };
             txtNMKeyword.Items.Clear();
             NewMovieQuerySite = new XQuerySite("LSite");
 
@@ -635,7 +658,7 @@ namespace XHelper
         }
         #endregion
 
-        private void listInformation_SelectionChanged(object sender, SelectionChangedEventArgs e) { var lb = sender as ListBox; lb.ScrollIntoView(lb.Items[lb.Items.Count - 1]); }
+        private void ListInformation_SelectionChanged(object sender, SelectionChangedEventArgs e) { var lb = sender as ListBox; lb.ScrollIntoView(lb.Items[lb.Items.Count - 1]); }
 
     }
 }
